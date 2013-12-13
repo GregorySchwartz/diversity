@@ -69,9 +69,8 @@ generateDiversity opts = do
 
     let fastaList    = fastaParser contents
     let positionMap  = generatePositionMap window fastaList
-    let diversityMap = generateDiversityMap order positionMap
 
-    writeFile (output opts) . printDiversity label order $ diversityMap
+    writeFile (output opts) . printDiversity label order window $ positionMap
 
 main :: IO ()
 main = execParser opts >>= generateDiversity

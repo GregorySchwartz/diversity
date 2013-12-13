@@ -18,6 +18,7 @@ type Position  = Int
 type Diversity = Double
 type Order     = Double
 type Label     = String
+type Window    = Int
 
 -- Advanced
 type PositionMap     = M.Map Position [Fragment]

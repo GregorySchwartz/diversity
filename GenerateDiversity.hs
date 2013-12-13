@@ -43,8 +43,3 @@ generatePositionMap win = M.fromListWith (++) . posSeqList
     posSeqList    = map toList . concatMap (\x -> zip [1..] . fragment win
                                            . fastaSeq $ x)
     toList (x, y) = (x, [y])
-
--- | Generate DiversityMap from a PositionMap which contains the diversity
--- at each position.
-generateDiversityMap :: Order -> PositionMap -> DiversityMap
-generateDiversityMap order = M.map (diversity order)

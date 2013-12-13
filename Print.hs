@@ -12,15 +12,23 @@ import qualified Data.Map as M
 
 -- Local
 import Types
+import Diversity
 
 -- Return the results of the diversity analysis in string form for saving
 -- to a file
-printDiversity :: Label -> Order -> DiversityMap -> String
-printDiversity label order diversityMap = header ++ body
+printDiversity :: Label -> Order -> Window -> PositionMap -> String
+printDiversity label order window positionMap = header ++ body
   where
-    header           = "label,order,position,diversity\n"
+    header           = "label,order,window,position,weight,diversity\n"
     body             = unlines                          .
                        map mapLine                      .
                        M.toAscList                      $
-                       diversityMap
-    mapLine (p, d) = intercalate "," [label, show order, show p, show d]
+                       positionMap
+    mapLine (p, xs) = intercalate "," . line p $ xs
+    line p xs = [ label
+                , show order
+                , show window
+                , show p
+                , show . length $ xs
+                , show . diversity order $ xs
+                ]
