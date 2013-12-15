@@ -19,3 +19,8 @@ fastaParser = map makeFastaSequence . Split.splitOn ">"
                                         , fastaSeq  = getSeq x
                                         }
     getSeq              = concat . drop 1 . lines
+
+removeNs :: [FastaSequence] -> [FastaSequence]
+removeNs = map (\x -> x { fastaSeq = noN . fastaSeq $ x })
+  where
+    noN = filter (\y -> y /= 'N' && y /= 'n')

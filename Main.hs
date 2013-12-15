@@ -23,6 +23,7 @@ data Options = Options { inputLabel  :: String
                        , inputOrder  :: Double
                        , inputWindow :: Int
                        , inputFasta  :: String
+                       , removeN     :: Bool
                        , output      :: String
                        }
 
@@ -53,6 +54,10 @@ options = Options
          <> metavar "FILE"
          <> value ""
          <> help "The fasta file containing the germlines and clones" )
+      <*> switch
+          ( long "removeN"
+         <> short 'n'
+         <> help "Remove 'N' and 'n' characters" )
       <*> strOption
           ( long "output"
          <> short 'o'
@@ -66,8 +71,10 @@ generateDiversity opts = do
     let label        = inputLabel opts
     let order        = inputOrder opts
     let window       = inputWindow opts
+    let nFlag        = removeN opts
 
-    let fastaList    = fastaParser contents
+    let fastaListN   = fastaParser contents
+    let fastaList    = if nFlag then removeNs fastaListN else fastaListN
     let positionMap  = generatePositionMap window fastaList
 
     writeFile (output opts) . printDiversity label order window $ positionMap
