@@ -23,4 +23,4 @@ fastaParser = map makeFastaSequence . Split.splitOn ">"
 removeNs :: [FastaSequence] -> [FastaSequence]
 removeNs = map (\x -> x { fastaSeq = noN . fastaSeq $ x })
   where
-    noN = filter (\y -> y /= 'N' && y /= 'n')
+    noN = map (\y -> if (y /= 'N' && y /= 'n') then y else '-')

@@ -27,19 +27,25 @@ takeWhile' p n (x:xs)
     | not (p x) && n > 0 = takeWhile' p n xs
     | otherwise     = []
 
--- | Generates fragment list from string of "win" length
-fragment :: Int -> String -> [String]
-fragment win xs | length xs < win = []
-                | length (takeWhile' noGaps win xs) /= win = []
-                | not . noGaps . head $ xs = fragment win (tail xs)
-                | otherwise = takeWhile' noGaps win xs : fragment win (tail xs)
+-- | Generates fragment list from string of "win" length. This version
+-- differs from normal as it takes a tuple with the position as the first
+-- entry
+fragmentPos :: Int -> [(Position, String)] -> [(Position, String)]
+fragmentPos win xs | length xs < win = []
+                   | otherwise       = combine (take win xs)
+                                     : fragmentPos win (tail xs)
   where
-    noGaps y = y /= '-' && y /= '.'
+    combine = foldl1' (\(x, xs) (_, y) -> (x, xs ++ y))
 
 -- | Generate the PositionMap from a list of FastaSequences
 generatePositionMap :: Int -> [FastaSequence] -> PositionMap
 generatePositionMap win = M.fromListWith (++) . posSeqList
   where
-    posSeqList    = map toList . concatMap (\x -> zip [1..] . fragment win
-                                           . fastaSeq $ x)
+    posSeqList    = map toList . concatMap (\x -> fragmentPos win
+                                           . map (\(p, f) -> (p, [f]))
+                                           . filter (\(p, f) -> noGaps f)
+                                           . zip [1..]
+                                           . fastaSeq
+                                           $ x)
     toList (x, y) = (x, [y])
+    noGaps y = y /= '-' && y /= '.'

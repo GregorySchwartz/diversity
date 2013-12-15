@@ -38,7 +38,7 @@ options = Options
          <> help "The label for this particular dataset" )
       <*> option
           ( long "inputOrder"
-         <> short 'o'
+         <> short 'r'
          <> metavar "ORDER"
          <> value 1
          <> help "The order of true diversity" )
@@ -76,6 +76,7 @@ generateDiversity opts = do
     let fastaListN   = fastaParser contents
     let fastaList    = if nFlag then removeNs fastaListN else fastaListN
     let positionMap  = generatePositionMap window fastaList
+    print positionMap
 
     writeFile (output opts) . printDiversity label order window $ positionMap
 
