@@ -5,6 +5,7 @@
 
 module Diversity where
 
+-- Built-in
 import Data.List
 
 -- Takes two strings, returns Hamming distance

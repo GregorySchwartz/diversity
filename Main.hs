@@ -1,10 +1,8 @@
--- Compare Diversity with Mutation Counts
+-- Diversity
 -- By G.W. Schwartz
 
--- Takes a DW2 fasta file and generates the mutation counts of the clones
--- from each listed germline in the file per position in a dataframe type
--- format. For use with comparing the counts with the diversities generated
--- already.
+-- Takes a fasta file and return the diversity of a certain order and
+-- window length (to split into fragments) by position.
 
 -- Built in
 import qualified Data.Map as M
@@ -76,7 +74,6 @@ generateDiversity opts = do
     let fastaListN   = fastaParser contents
     let fastaList    = if nFlag then removeNs fastaListN else fastaListN
     let positionMap  = generatePositionMap window fastaList
-    print positionMap
 
     writeFile (output opts) . printDiversity label order window $ positionMap
 
@@ -87,4 +84,4 @@ main = execParser opts >>= generateDiversity
       ( fullDesc
      <> progDesc "Return the diversity at each position for all sequences in a\
                  \ fasta file"
-     <> header "Generate Diversity, Gregory W. Schwartz" )
+     <> header "Diversity, Gregory W. Schwartz" )

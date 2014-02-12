@@ -29,7 +29,7 @@ fragmentPos win xs | length xs < win = []
     combine = foldl1' (\(x, xs) (_, y) -> (x, xs ++ y))
 
 -- | Generate the PositionMap from a list of FastaSequences
-generatePositionMap :: Int -> [FastaSequence] -> PositionMap
+generatePositionMap :: Window -> [FastaSequence] -> PositionMap
 generatePositionMap win = M.fromListWith (++) . posSeqList
   where
     posSeqList    = map toList . concatMap (\x -> fragmentPos win
