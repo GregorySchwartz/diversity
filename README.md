@@ -1,4 +1,5 @@
-== Diversity ==
+Diversity
+=========
 
 Gregory W. Schwartz
 
