@@ -17,45 +17,53 @@ import GenerateDiversity
 import Print
 
 -- Command line arguments
-data Options = Options { inputLabel  :: String
-                       , inputOrder  :: Double
-                       , inputWindow :: Int
-                       , inputFasta  :: String
-                       , removeN     :: Bool
-                       , output      :: String
+data Options = Options { inputLabel        :: String
+                       , inputOrder        :: Double
+                       , inputWindow       :: Int
+                       , inputFasta        :: String
+                       , removeN           :: Bool
+                       , outputRarefaction :: String
+                       , output            :: String
                        }
 
 -- Command line options
 options :: Parser Options
 options = Options
       <$> strOption
-          ( long "inputLabel"
+          ( long "input-label"
          <> short 'l'
          <> metavar "LABEL"
          <> value ""
          <> help "The label for this particular dataset" )
       <*> option
-          ( long "inputOrder"
+          ( long "input-order"
          <> short 'r'
-         <> metavar "ORDER"
+         <> metavar "[1]|INT"
          <> value 1
          <> help "The order of true diversity" )
       <*> option
-          ( long "inputWindow"
+          ( long "input-window"
          <> short 'w'
-         <> metavar "WINDOW"
+         <> metavar "[1]|INT"
          <> value 1
          <> help "The length of the sliding window for generating fragments" )
       <*> strOption
-          ( long "inputFasta"
+          ( long "input-fasta"
          <> short 'i'
          <> metavar "FILE"
          <> value ""
          <> help "The fasta file containing the germlines and clones" )
       <*> switch
-          ( long "removeN"
+          ( long "remove-N"
          <> short 'n'
          <> help "Remove 'N' and 'n' characters" )
+      <*> strOption
+          ( long "output-rarefaction"
+         <> short 'O'
+         <> metavar "FILE"
+         <> value ""
+         <> help "The csv file containing the rarefaction curves at each\
+                 \ position" )
       <*> strOption
           ( long "output"
          <> short 'o'
@@ -76,6 +84,11 @@ generateDiversity opts = do
     let positionMap  = generatePositionMap window fastaList
 
     writeFile (output opts) . printDiversity label order window $ positionMap
+
+    if (null . outputRarefaction $ opts)
+        then return ()
+        else writeFile (outputRarefaction opts) $
+            printRarefaction label window positionMap
 
 main :: IO ()
 main = execParser opts >>= generateDiversity
