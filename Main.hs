@@ -34,7 +34,8 @@ options = Options
          <> short 'l'
          <> metavar "LABEL"
          <> value ""
-         <> help "The label for this particular dataset" )
+         <> help "The label for this particular dataset (to differentiate\
+                 \ the file in batch analyses)" )
       <*> option
           ( long "input-order"
          <> short 'r'
@@ -62,8 +63,9 @@ options = Options
          <> short 'O'
          <> metavar "FILE"
          <> value ""
-         <> help "The csv file containing the rarefaction curves at each\
-                 \ position" )
+         <> help "The csv file containing the rarefaction values (the percent\
+                 \ of the rarefaction curve that is above 95% of the height of\
+                 \ the rarefaction curve)" )
       <*> strOption
           ( long "output"
          <> short 'o'
