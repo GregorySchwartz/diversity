@@ -9,8 +9,7 @@ must be aligned.
 
 To install:
 ```
-cabal configure
-cabal build
+cabal update
 cabal install
 ```
 
