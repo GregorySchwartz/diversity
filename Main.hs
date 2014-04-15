@@ -17,13 +17,14 @@ import GenerateDiversity
 import Print
 
 -- Command line arguments
-data Options = Options { inputLabel        :: String
-                       , inputOrder        :: Double
-                       , inputWindow       :: Int
-                       , inputFasta        :: String
-                       , removeN           :: Bool
-                       , outputRarefaction :: String
-                       , output            :: String
+data Options = Options { inputLabel             :: String
+                       , inputOrder             :: Double
+                       , inputWindow            :: Int
+                       , inputFasta             :: String
+                       , removeN                :: Bool
+                       , outputRarefaction      :: String
+                       , outputRarefactionCurve :: String
+                       , output                 :: String
                        }
 
 -- Command line options
@@ -67,6 +68,12 @@ options = Options
                  \ of the rarefaction curve that is above 95% of the height of\
                  \ the rarefaction curve)" )
       <*> strOption
+          ( long "output-rarefaction-curve"
+         <> short 'c'
+         <> metavar "FILE"
+         <> value ""
+         <> help "The csv file containing the rarefaction curve" )
+      <*> strOption
           ( long "output"
          <> short 'o'
          <> metavar "FILE"
@@ -91,6 +98,10 @@ generateDiversity opts = do
         then return ()
         else writeFile (outputRarefaction opts) $
             printRarefaction label window positionMap
+    if (null . outputRarefactionCurve $ opts)
+        then return ()
+        else writeFile (outputRarefactionCurve opts) $
+            printRarefactionCurve label window positionMap
 
 main :: IO ()
 main = execParser opts >>= generateDiversity

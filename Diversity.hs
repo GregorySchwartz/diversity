@@ -25,11 +25,11 @@ diversity order sample
                    ((fromIntegral . length $ sample) :: Double)
     speciesList  = group . sort $ sample
 
--- Calculates the binary coefficient
-choose :: (Integral a) => a -> a -> a
+-- Calculates the binomial coefficient
+choose :: Double -> Double -> Double
 choose _ 0 = 1
 choose 0 _ = 0
-choose n k = choose (n - 1) (k - 1) * n `div` k
+choose n k = foldr (\i acc -> acc * ((n + 1 - i) / i)) 1 [1..k]
 
 -- Returns the rarefaction curve for each position in a list
 rarefactionCurve :: (Eq a, Ord a) => [a] -> [Double]
@@ -39,12 +39,11 @@ rarefactionCurve xs = map rarefact [1..n_total]
         | n == 0       = 0
         | n == 1       = 1
         | n == n_total = k
-        | otherwise    = k - ((1 / (fromIntegral (choose n_total n))) * inner n)
-    inner n = fromIntegral                              .
-              sum                                       .
-              map (\g -> choose (n_total - length g) n) $
-              grouped
-    n_total = length xs
+        | otherwise    = k - ((1 / (choose n_total n)) * inner n)
+    inner n = sum
+            . map (\g -> choose (n_total - genericLength g) n)
+            $ grouped
+    n_total = genericLength xs
     k       = genericLength grouped
     grouped = group . sort $ xs
 

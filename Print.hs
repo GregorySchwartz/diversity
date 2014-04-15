@@ -38,7 +38,7 @@ printDiversity label order window positionMap = header ++ body
 printRarefaction :: Label -> Window -> PositionMap -> String
 printRarefaction label window positionMap = header ++ body
   where
-    header           = "label,window,position,weight,percent_above"
+    header           = "label,window,position,weight,percent_above\n"
     body             = unlines                          .
                        map mapLine                      .
                        M.toAscList                      $
@@ -49,4 +49,22 @@ printRarefaction label window positionMap = header ++ body
                  , show p
                  , show . length $ xs
                  , show . rarefactionViable . rarefactionCurve $ xs
+                 ]
+
+-- Return the results of the rarefaction analysis of the entire curve in
+-- string form for saving to a file
+printRarefactionCurve :: Label -> Window -> PositionMap -> String
+printRarefactionCurve label window positionMap = header ++ body
+  where
+    header           = "label,window,position,weight,curve\n"
+    body             = unlines                          .
+                       map mapLine                      .
+                       M.toAscList                      $
+                       positionMap
+    mapLine (p, xs) = intercalate "," . line p $ xs
+    line p xs  = [ label
+                 , show window
+                 , show p
+                 , show . length $ xs
+                 , intercalate "," . map show . rarefactionCurve $ xs
                  ]
