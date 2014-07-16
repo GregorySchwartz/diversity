@@ -4,15 +4,11 @@
 -- Takes a fasta file and return the diversity of a certain order and
 -- window length (to split into fragments) by position.
 
--- Built in
-import qualified Data.Map as M
-
 -- Cabal
 import Options.Applicative
 
 -- Local
-import Types
-import FastaParse
+import Parse
 import GenerateDiversity
 import Print
 
@@ -88,7 +84,7 @@ generateDiversity opts = do
     let window       = inputWindow opts
     let nFlag        = removeN opts
 
-    let fastaListN   = fastaParser contents
+    let fastaListN   = parseFasta contents
     let fastaList    = if nFlag then removeNs fastaListN else fastaListN
     let positionMap  = generatePositionMap window fastaList
 
