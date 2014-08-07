@@ -7,6 +7,8 @@ This program will take a fasta file and find the diversity and rarefaction value
 (percent of the rarefaction curve that is above 95% of the curve). The sequences
 must be aligned.
 
+Depends on "fasta": https://github.com/GregorySchwartz/fasta.git 
+
 To install:
 ```
 cabal update
