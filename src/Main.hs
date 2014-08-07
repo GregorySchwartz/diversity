@@ -6,9 +6,9 @@
 
 -- Cabal
 import Options.Applicative
+import Data.Fasta.String.Parse
 
 -- Local
-import Data.Fasta.String.Parse
 import GenerateDiversity
 import Print
 

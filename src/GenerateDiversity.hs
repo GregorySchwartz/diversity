@@ -9,9 +9,9 @@ module GenerateDiversity where
 -- Built in
 import qualified Data.Map as M
 import Data.List
+import Data.Fasta.String.Types
 
 -- Local
-import Data.Fasta.String.Types
 import Types
 
 -- | Generates fragment list from string of "win" length. This version
