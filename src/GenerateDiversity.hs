@@ -9,7 +9,7 @@ module GenerateDiversity where
 -- Built in
 import qualified Data.Map as M
 import Data.List
-import Data.Fasta.String.Types
+import Data.Fasta.String
 
 -- Local
 import Types
