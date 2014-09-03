@@ -18,7 +18,7 @@ cabal-version:       >=1.8
 executable diversity
   main-is:             Main.hs
   -- other-modules:       
-  build-depends:       base >=4.5, containers >=0.4, split >=0.2, optparse-applicative >=0.7, parsec >=3.1.5, fasta >=0.5
+  build-depends:       base ==4.6.*, containers ==0.5.*, split ==0.2.*, optparse-applicative ==0.10.*, parsec ==3.1.*, fasta ==0.5.*
 
   -- Directories containing source files.
   hs-source-dirs:      src
