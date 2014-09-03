@@ -33,13 +33,13 @@ options = Options
          <> value ""
          <> help "The label for this particular dataset (to differentiate\
                  \ the file in batch analyses)" )
-      <*> option
+      <*> option auto
           ( long "input-order"
          <> short 'r'
          <> metavar "[1]|INT"
          <> value 1
          <> help "The order of true diversity" )
-      <*> option
+      <*> option auto
           ( long "input-window"
          <> short 'w'
          <> metavar "[1]|INT"
