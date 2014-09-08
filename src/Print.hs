@@ -20,10 +20,10 @@ printDiversity :: Label -> Order -> Window -> PositionMap -> String
 printDiversity label order window positionMap = header ++ body
   where
     header           = "label,order,window,position,weight,diversity\n"
-    body             = unlines                          .
-                       map mapLine                      .
-                       M.toAscList                      $
-                       positionMap
+    body             = unlines
+                     . map mapLine
+                     . M.toAscList
+                     $ positionMap
     mapLine (p, xs) = intercalate "," . line p $ xs
     line p xs = [ label
                 , show order
@@ -39,10 +39,10 @@ printRarefaction :: Label -> Window -> PositionMap -> String
 printRarefaction label window positionMap = header ++ body
   where
     header           = "label,window,position,weight,percent_above\n"
-    body             = unlines                          .
-                       map mapLine                      .
-                       M.toAscList                      $
-                       positionMap
+    body             = unlines
+                     . map mapLine
+                     . M.toAscList
+                     $ positionMap
     mapLine (p, xs) = intercalate "," . line p $ xs
     line p xs  = [ label
                  , show window
@@ -57,14 +57,14 @@ printRarefactionCurve :: Label -> Window -> PositionMap -> String
 printRarefactionCurve label window positionMap = header ++ body
   where
     header           = "label,window,position,weight,curve\n"
-    body             = unlines                          .
-                       map mapLine                      .
-                       M.toAscList                      $
-                       positionMap
+    body             = unlines
+                     . map mapLine
+                     . M.toAscList
+                     $ positionMap
     mapLine (p, xs) = intercalate "," . line p $ xs
     line p xs  = [ label
                  , show window
                  , show p
                  , show . length $ xs
-                 , intercalate "," . map show . rarefactionCurve $ xs
+                 , intercalate "/" . map show . rarefactionCurve $ xs
                  ]

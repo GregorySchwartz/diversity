@@ -17,18 +17,19 @@ import Types
 -- | Generates fragment list from string of "win" length. This version
 -- differs from normal as it takes a tuple with the position as the first
 -- entry
-fragmentPos :: Int -> [(Position, String)] -> [(Position, String)]
-fragmentPos win xs | length xs < win = []
-                   | otherwise       = combine (take win xs)
-                                     : fragmentPos win (tail xs)
+fragmentPos :: Bool -> Int -> [(Position, String)] -> [(Position, String)]
+fragmentPos whole win xs | whole           = combine xs : []
+                         | length xs < win = []
+                         | otherwise       = combine (take win xs)
+                                           : fragmentPos whole win (tail xs)
   where
     combine = foldl1' (\(x, ys) (_, y) -> (x, ys ++ y))
 
 -- | Generate the PositionMap from a list of FastaSequences
-generatePositionMap :: Window -> [FastaSequence] -> PositionMap
-generatePositionMap win = M.fromListWith (++) . posSeqList
+generatePositionMap :: Bool -> Window -> [FastaSequence] -> PositionMap
+generatePositionMap whole win = M.fromListWith (++) . posSeqList
   where
-    posSeqList    = map toList . concatMap (\x -> fragmentPos win
+    posSeqList    = map toList . concatMap (\x -> fragmentPos whole win
                                            . map (\(p, f) -> (p, [f]))
                                            . filter (\(_, f) -> noGaps f)
                                            . zip [1..]

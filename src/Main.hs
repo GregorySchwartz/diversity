@@ -4,6 +4,9 @@
 -- Takes a fasta file and return the diversity of a certain order and
 -- window length (to split into fragments) by position.
 
+-- Built-in
+import Data.List
+
 -- Cabal
 import Options.Applicative
 import Data.Fasta.String.Parse
@@ -18,6 +21,8 @@ data Options = Options { inputLabel             :: String
                        , inputWindow            :: Int
                        , inputFasta             :: String
                        , removeN                :: Bool
+                       , wholeSeq               :: Bool
+                       , list                   :: Bool
                        , outputRarefaction      :: String
                        , outputRarefactionCurve :: String
                        , output                 :: String
@@ -55,6 +60,16 @@ options = Options
           ( long "remove-N"
          <> short 'n'
          <> help "Remove 'N' and 'n' characters" )
+      <*> switch
+          ( long "whole-sequence"
+         <> short 'a'
+         <> help "Ignore window length and only analyze the entire sequence for\
+                 \ diversity and rarefaction curves." )
+      <*> switch
+          ( long "list"
+         <> short 'L'
+         <> help "Analyze a diversity of species in a list separated by lines\
+                 \ instead of a fasta file" )
       <*> strOption
           ( long "output-rarefaction"
          <> short 'O'
@@ -78,18 +93,24 @@ options = Options
 
 generateDiversity :: Options -> IO ()
 generateDiversity opts = do
-    contents <- readFile . inputFasta $ opts
-    let label        = inputLabel opts
-    let order        = inputOrder opts
-    let window       = inputWindow opts
-    let nFlag        = removeN opts
+    contentsFile <- readFile . inputFasta $ opts
+    let lineIt       = unlines . (:) ">" . intersperse ">" . lines
+        contents     = if (list opts) then lineIt contentsFile else contentsFile
+        label        = inputLabel opts
+        order        = inputOrder opts
+        window       = inputWindow opts
+        nFlag        = removeN opts
+        whole        = wholeSeq opts
 
-    let fastaListN   = parseFasta contents
-    let fastaList    = if nFlag then removeNs fastaListN else fastaListN
-    let positionMap  = generatePositionMap window fastaList
+        fastaListN   = parseFasta contents
+        fastaList    = if nFlag then removeNs fastaListN else fastaListN
+        positionMap  = generatePositionMap whole window fastaList
 
-    writeFile (output opts) . printDiversity label order window $ positionMap
-
+    if (null . output $ opts)
+        then return ()
+        else writeFile (output opts)
+           . printDiversity label order window
+           $ positionMap
     if (null . outputRarefaction $ opts)
         then return ()
         else writeFile (outputRarefaction opts) $
