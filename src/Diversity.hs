@@ -7,6 +7,7 @@ module Diversity where
 
 -- Built-in
 import Data.List
+import Data.Ratio
 
 -- Takes two strings, returns Hamming distance
 hamming :: String -> String -> Int
@@ -25,11 +26,10 @@ diversity order sample
                    ((fromIntegral . length $ sample) :: Double)
     speciesList  = group . sort $ sample
 
--- Calculates the binomial coefficient
-choose :: Double -> Double -> Double
-choose _ 0 = 1
-choose 0 _ = 0
-choose n k = foldr (\i acc -> acc * ((n + 1 - i) / i)) 1 [1..k]
+specialBinomial :: Integer -> Integer -> Integer -> Double
+specialBinomial n_total g n = fromRational
+                            $ product [(n_total - g - n + 1)..(n_total - g)]
+                            % product [(n_total - n + 1)..n_total]
 
 -- Returns the rarefaction curve for each position in a list
 rarefactionCurve :: (Eq a, Ord a) => [a] -> [Double]
@@ -39,9 +39,9 @@ rarefactionCurve xs = map rarefact [1..n_total]
         | n == 0       = 0
         | n == 1       = 1
         | n == n_total = k
-        | otherwise    = k - ((1 / (choose n_total n)) * inner n)
+        | otherwise    = k - inner n
     inner n = sum
-            . map (\g -> choose (n_total - genericLength g) n)
+            . map (\g -> specialBinomial n_total (genericLength g) n)
             $ grouped
     n_total = genericLength xs
     k       = genericLength grouped
