@@ -18,10 +18,11 @@ import Types
 -- differs from normal as it takes a tuple with the position as the first
 -- entry
 fragmentPos :: Bool -> Int -> [(Position, String)] -> [(Position, String)]
-fragmentPos whole win xs | whole           = combine xs : []
-                         | length xs < win = []
-                         | otherwise       = combine (take win xs)
-                                           : fragmentPos whole win (tail xs)
+fragmentPos whole win xs | whole && null xs = error "Empty line in file!!"
+                         | whole            = combine xs : []
+                         | length xs < win  = []
+                         | otherwise        = combine (take win xs)
+                                            : fragmentPos whole win (tail xs)
   where
     combine = foldl1' (\(x, ys) (_, y) -> (x, ys ++ y))
 
