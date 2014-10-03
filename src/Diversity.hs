@@ -8,6 +8,7 @@ module Diversity where
 -- Built-in
 import Data.List
 import Data.Ratio
+import Numeric.SpecFunctions (choose)
 
 -- Takes two strings, returns Hamming distance
 hamming :: String -> String -> Int
@@ -26,26 +27,32 @@ diversity order sample
                    ((fromIntegral . length $ sample) :: Double)
     speciesList  = group . sort $ sample
 
-specialBinomial :: Integer -> Integer -> Integer -> Double
-specialBinomial n_total g n = fromRational
-                            $ product [(n_total - g - n + 1)..(n_total - g)]
-                            % product [(n_total - n + 1)..n_total]
+specialBinomial :: Bool -> Integer -> Integer -> Integer -> Double
+specialBinomial False n_total g n = fromRational
+    $ product [(n_total - g - n + 1)..(n_total - g)]
+    % product [(n_total - n + 1)..n_total]
+specialBinomial True n_total g n = choose
+                                   (fromIntegral n_total - fromIntegral g)
+                                   (fromIntegral n)
 
 -- Returns the rarefaction curve for each position in a list
-rarefactionCurve :: (Eq a, Ord a) => [a] -> [Double]
-rarefactionCurve xs = map rarefact [1..n_total]
+rarefactionCurve :: (Eq a, Ord a) => Bool -> [a] -> [Double]
+rarefactionCurve fastBin xs = map rarefact [1..n_total]
   where
     rarefact n
         | n == 0       = 0
         | n == 1       = 1
         | n == n_total = k
         | otherwise    = k - inner n
-    inner n = sum
-            . map (\g -> specialBinomial n_total (genericLength g) n)
+    inner n = ( \x -> if fastBin
+                        then x / choose (fromIntegral n_total) (fromIntegral n)
+                        else x )
+            . sum
+            . map (\g -> specialBinomial fastBin n_total g n)
             $ grouped
     n_total = genericLength xs
     k       = genericLength grouped
-    grouped = group . sort $ xs
+    grouped = map genericLength . group . sort $ xs
 
 -- Calculates the percent of the curve that is above 95% of height of the curve
 rarefactionViable :: [Double] -> Double

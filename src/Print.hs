@@ -35,8 +35,8 @@ printDiversity label order window positionMap = header ++ body
 
 -- Return the results of the rarefaction analysis in string form for saving
 -- to a file
-printRarefaction :: Label -> Window -> PositionMap -> String
-printRarefaction label window positionMap = header ++ body
+printRarefaction :: Bool -> Label -> Window -> PositionMap -> String
+printRarefaction fastBin label window positionMap = header ++ body
   where
     header           = "label,window,position,weight,percent_above\n"
     body             = unlines
@@ -48,13 +48,13 @@ printRarefaction label window positionMap = header ++ body
                  , show window
                  , show p
                  , show . length $ xs
-                 , show . rarefactionViable . rarefactionCurve $ xs
+                 , show . rarefactionViable . rarefactionCurve fastBin $ xs
                  ]
 
 -- Return the results of the rarefaction analysis of the entire curve in
 -- string form for saving to a file
-printRarefactionCurve :: Label -> Window -> PositionMap -> String
-printRarefactionCurve label window positionMap = header ++ body
+printRarefactionCurve :: Bool -> Label -> Window -> PositionMap -> String
+printRarefactionCurve fastBin label window positionMap = header ++ body
   where
     header           = "label,window,position,weight,curve\n"
     body             = unlines
@@ -66,5 +66,5 @@ printRarefactionCurve label window positionMap = header ++ body
                  , show window
                  , show p
                  , show . length $ xs
-                 , intercalate "/" . map show . rarefactionCurve $ xs
+                 , intercalate "/" . map show . rarefactionCurve fastBin $ xs
                  ]

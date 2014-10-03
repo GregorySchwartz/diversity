@@ -20,6 +20,7 @@ data Options = Options { inputLabel             :: String
                        , inputOrder             :: Double
                        , inputWindow            :: Int
                        , inputFasta             :: String
+                       , fastBin                :: Bool
                        , removeN                :: Bool
                        , wholeSeq               :: Bool
                        , list                   :: Bool
@@ -56,6 +57,11 @@ options = Options
          <> metavar "FILE"
          <> value ""
          <> help "The fasta file containing the germlines and clones" )
+      <*> switch
+          ( long "fast-bin"
+         <> short 'f'
+         <> help "Whether to use a much faster, but approximated, binomial\
+                 \ coefficient for the rarefaction analysis" )
       <*> switch
           ( long "remove-N"
          <> short 'n'
@@ -114,11 +120,11 @@ generateDiversity opts = do
     if (null . outputRarefaction $ opts)
         then return ()
         else writeFile (outputRarefaction opts) $
-            printRarefaction label window positionMap
+            printRarefaction (fastBin opts) label window positionMap
     if (null . outputRarefactionCurve $ opts)
         then return ()
         else writeFile (outputRarefactionCurve opts) $
-            printRarefactionCurve label window positionMap
+            printRarefactionCurve (fastBin opts) label window positionMap
 
 main :: IO ()
 main = execParser opts >>= generateDiversity
