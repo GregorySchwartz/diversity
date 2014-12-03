@@ -19,11 +19,11 @@ library
   hs-source-dirs:      src/src-lib
   exposed-modules:     Diversity.Types, Diversity.Diversity, Diversity.GenerateDiversity, Diversity.Print
   -- other-modules:
-  build-depends:       base >=4.6 && <4.8, containers ==0.5.*, split ==0.2.*, parsec ==3.1.*, fasta >=0.5.1.1 && <0.6, math-functions ==0.1.*
+  build-depends:       base >=4.6 && <4.8, containers >=0.5 && <0.6, split >=0.2 && <0.3, parsec >=3.1 && <4.0, fasta >=0.5.1.2 && <0.6, math-functions >=0.1 && <0.2
 
 executable diversity
   -- Directories containing source files.
   hs-source-dirs:      src/src-exec
   main-is:             Main.hs
   -- other-modules:       
-  build-depends:       diversity, base >=4.6 && <4.8, optparse-applicative ==0.10.*, fasta >=0.5.1.1 && <0.6
+  build-depends:       diversity, base >=4.6 && <4.8, optparse-applicative >=0.10 && <0.12, fasta >=0.5.1.2 && <0.6
