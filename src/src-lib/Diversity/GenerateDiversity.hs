@@ -1,10 +1,12 @@
 -- GenerateDiversity module.
 -- By G.W. Schwartz
 --
--- Collection of functions for the collection of fragments for the
--- diversity calculations.
+{- | Collection of functions for the collection of fragments for the
+diversity calculations.
+-}
 
-module Diversity.GenerateDiversity where
+module Diversity.GenerateDiversity ( fragmentPos
+                                   , generatePositionMap ) where
 
 -- Built in
 import qualified Data.Map as M

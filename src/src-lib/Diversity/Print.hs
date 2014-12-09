@@ -1,10 +1,13 @@
 -- Print module
 -- By G.W. Schwartz
 --
--- Collection of functions for the printing of data (converting data
--- structures into strings for use with writing to output files).
+{- | Collection of functions for the printing of data (converting data
+structures into strings for use with writing to output files).
+-}
 
-module Diversity.Print where
+module Diversity.Print ( printDiversity
+                       , printRarefaction
+                       , printRarefactionCurve ) where
 
 -- Built in
 import Data.List

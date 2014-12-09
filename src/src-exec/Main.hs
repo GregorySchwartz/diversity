@@ -1,8 +1,9 @@
 -- Diversity
 -- By G.W. Schwartz
 
--- Takes a fasta file and return the diversity of a certain order and
--- window length (to split into fragments) by position.
+{- | Takes a fasta file and return the diversity of a certain order and
+window length (to split into fragments) by position.
+-}
 
 -- Built-in
 import Data.List

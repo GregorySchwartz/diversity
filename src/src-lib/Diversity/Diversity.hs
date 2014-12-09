@@ -1,20 +1,24 @@
 -- Diversity module.
 -- By G.W. Schwartz
 --
--- Collection of functions pertaining to finding the diversity of samples.
+{- | Collection of functions pertaining to finding the diversity of samples.
+-}
 
-module Diversity.Diversity where
+module Diversity.Diversity ( hamming
+                           , diversity
+                           , rarefactionCurve
+                           , rarefactionViable ) where
 
 -- Built-in
 import Data.List
 import Data.Ratio
 import Numeric.SpecFunctions (choose)
 
--- Takes two strings, returns Hamming distance
+-- | Takes two strings, returns Hamming distance
 hamming :: String -> String -> Int
 hamming xs ys = length $ filter not $ zipWith (==) xs ys
 
--- Returns the diversity of a list of things
+-- | Returns the diversity of a list of things
 diversity :: (Ord b) => Double -> [b] -> Double
 diversity order sample
     | length sample == 0 = 0
@@ -27,6 +31,7 @@ diversity order sample
                    ((fromIntegral . length $ sample) :: Double)
     speciesList  = group . sort $ sample
 
+-- | Binomial for large numbers (slow but works for big numbers)
 specialBinomial :: Bool -> Integer -> Integer -> Integer -> Double
 specialBinomial False n_total g n = fromRational
     $ product [(n_total - g - n + 1)..(n_total - g)]
@@ -35,7 +40,7 @@ specialBinomial True n_total g n = choose
                                    (fromIntegral n_total - fromIntegral g)
                                    (fromIntegral n)
 
--- Returns the rarefaction curve for each position in a list
+-- | Returns the rarefaction curve for each position in a list
 rarefactionCurve :: (Eq a, Ord a) => Bool -> [a] -> [Double]
 rarefactionCurve fastBin xs = map rarefact [1..n_total]
   where
@@ -54,7 +59,7 @@ rarefactionCurve fastBin xs = map rarefact [1..n_total]
     k       = genericLength grouped
     grouped = map genericLength . group . sort $ xs
 
--- Calculates the percent of the curve that is above 95% of height of the curve
+-- | Calculates the percent of the curve that is above 95% of height of the curve
 rarefactionViable :: [Double] -> Double
 rarefactionViable xs = (genericLength valid / genericLength xs) * 100
   where
