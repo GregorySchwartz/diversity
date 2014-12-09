@@ -2,7 +2,7 @@
 -- documentation, see http://haskell.org/cabal/users-guide/
 
 name:                diversity
-version:             0.2.0.5
+version:             0.3.0.0
 synopsis:            Return the diversity at each position for all sequences in a fasta file
 description:         Find the diversity of a collection of entities, mainly for use with fasta sequences. Produces a binary which works on fasta files to find the diversity of any order and rarefaction curves for a sliding window across all positions in the sequences. To analyze just a collection of entities, just use the whole sequences and list flag.
 homepage:            https://github.com/GregorySchwartz/diversity
@@ -16,12 +16,14 @@ build-type:          Simple
 cabal-version:       >=1.8
 
 library
+  ghc-options: -O2
   hs-source-dirs:      src/src-lib
-  exposed-modules:     Diversity.Types, Diversity.Diversity, Diversity.GenerateDiversity, Diversity.Print
+  exposed-modules:     Math.Diversity.Types, Math.Diversity.Diversity, Math.Diversity.GenerateDiversity, Math.Diversity.Print
   -- other-modules:
   build-depends:       base >=4.6 && <4.8, containers >=0.5 && <0.6, split >=0.2 && <0.3, parsec >=3.1 && <4.0, fasta >=0.5.1.2 && <0.6, math-functions >=0.1 && <0.2
 
 executable diversity
+  ghc-options: -O2
   -- Directories containing source files.
   hs-source-dirs:      src/src-exec
   main-is:             Main.hs

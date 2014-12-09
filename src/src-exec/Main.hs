@@ -13,8 +13,8 @@ import Options.Applicative
 import Data.Fasta.String.Parse
 
 -- Local
-import Diversity.GenerateDiversity
-import Diversity.Print
+import Math.Diversity.GenerateDiversity
+import Math.Diversity.Print
 
 -- Command line arguments
 data Options = Options { inputLabel             :: String
