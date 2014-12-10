@@ -7,9 +7,11 @@
 module Math.Diversity.Types where
 
 import qualified Data.Map as M
+import qualified Data.Sequence as Seq
 
 -- Basic
-type Fragment  = String
+type Fragment  = Seq.Seq Char
+type Sample    = String
 type Position  = Int
 type Diversity = Double
 type Order     = Double
@@ -19,6 +21,6 @@ type Window    = Int
 -- Advanced
 -- | At each position we have a collection of fragments to find the
 -- diversity of
-type PositionMap     = M.Map Position [Fragment]
+type PositionMap     = M.Map Position [(Sample, Fragment)]
 -- | At each position we have a diversity
 type DiversityMap    = M.Map Position Diversity

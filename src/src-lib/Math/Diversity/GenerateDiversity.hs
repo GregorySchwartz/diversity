@@ -5,6 +5,8 @@
 diversity calculations.
 -}
 
+{-# LANGUAGE BangPatterns #-}
+
 module Math.Diversity.GenerateDiversity ( fragmentPos
                                         , generatePositionMap ) where
 
@@ -12,31 +14,48 @@ module Math.Diversity.GenerateDiversity ( fragmentPos
 import qualified Data.Map as M
 import Data.List
 import Data.Fasta.String
+import qualified Data.Sequence as Seq
+
+-- Cabal
+import qualified Data.List.Split as Split
 
 -- Local
 import Math.Diversity.Types
 
+-- | Get the sample ID of a sequence
+getSample :: Int -> FastaSequence -> Sample
+getSample x = (!! (x - 1)) . Split.splitOn "|" . fastaHeader
+
 -- | Generates fragment list from string of "win" length. This version
 -- differs from normal as it takes a tuple with the position as the first
 -- entry
-fragmentPos :: Bool -> Int -> [(Position, String)] -> [(Position, String)]
+fragmentPos :: Bool -> Int -> [(Position, Fragment)] -> [(Position, Fragment)]
 fragmentPos whole win xs | whole && null xs = error "Empty line in file!!"
-                         | whole            = combine xs : []
+                         | whole            = [combine xs]
                          | length xs < win  = []
                          | otherwise        = combine (take win xs)
                                             : fragmentPos whole win (tail xs)
   where
-    combine = foldl1' (\(x, ys) (_, y) -> (x, ys ++ y))
+    combine = foldl1' (\(!x, !ys) (_, y) -> (x, ys Seq.>< y))
 
 -- | Generate the PositionMap from a list of FastaSequences
-generatePositionMap :: Bool -> Window -> [FastaSequence] -> PositionMap
-generatePositionMap whole win = M.fromListWith (++) . posSeqList
+generatePositionMap :: Bool
+                    -> Int
+                    -> Bool
+                    -> Window
+                    -> [FastaSequence]
+                    -> PositionMap
+generatePositionMap sample sampleField whole win =
+    M.fromListWith (++) . posSeqList
   where
-    posSeqList    = map toList . concatMap (\x -> fragmentPos whole win
-                                           . map (\(p, f) -> (p, [f]))
-                                           . filter (\(_, f) -> noGaps f)
+    posSeqList    = map toList . concatMap (\x -> map (\(!p, !f) -> (p, sampleIt sample x f))
+                                           . fragmentPos whole win
+                                           . map (\(!p, !f) -> (p, Seq.singleton f))
+                                           . filter (\(_, !f) -> noGaps f)
                                            . zip [1..]
                                            . fastaSeq
                                            $ x)
     toList (x, y) = (x, [y])
     noGaps y = y /= '-' && y /= '.'
+    sampleIt True s f = (getSample sampleField s, f)
+    sampleIt False _ f = ("Sample", f)

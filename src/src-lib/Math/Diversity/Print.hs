@@ -38,8 +38,14 @@ printDiversity label order window positionMap = header ++ body
 
 -- Return the results of the rarefaction analysis in string form for saving
 -- to a file
-printRarefaction :: Bool -> Label -> Window -> PositionMap -> String
-printRarefaction fastBin label window positionMap = header ++ body
+printRarefaction :: Bool
+                 -> Bool
+                 -> Label
+                 -> Window
+                 -> PositionMap
+                 -> String
+printRarefaction sample fastBin label window positionMap =
+    header ++ body
   where
     header           = "label,window,position,weight,percent_above\n"
     body             = unlines
@@ -51,13 +57,21 @@ printRarefaction fastBin label window positionMap = header ++ body
                  , show window
                  , show p
                  , show . length $ xs
-                 , show . rarefactionViable . rarefactionCurve fastBin $ xs
+                 , show . rarefactionViable . getRarefactionCurve sample $ xs
                  ]
+    getRarefactionCurve True = rarefactionSampleCurve fastBin
+    getRarefactionCurve False = rarefactionCurve fastBin
 
 -- Return the results of the rarefaction analysis of the entire curve in
 -- string form for saving to a file
-printRarefactionCurve :: Bool -> Label -> Window -> PositionMap -> String
-printRarefactionCurve fastBin label window positionMap = header ++ body
+printRarefactionCurve :: Bool
+                      -> Bool
+                      -> Label
+                      -> Window
+                      -> PositionMap
+                      -> String
+printRarefactionCurve sample fastBin label window positionMap =
+    header ++ body
   where
     header           = "label,window,position,weight,curve\n"
     body             = unlines
@@ -69,5 +83,7 @@ printRarefactionCurve fastBin label window positionMap = header ++ body
                  , show window
                  , show p
                  , show . length $ xs
-                 , intercalate "/" . map show . rarefactionCurve fastBin $ xs
+                 , intercalate "/" . map show . getRarefactionCurve sample $ xs
                  ]
+    getRarefactionCurve True = rarefactionSampleCurve fastBin
+    getRarefactionCurve False = rarefactionCurve fastBin

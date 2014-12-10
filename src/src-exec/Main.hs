@@ -21,10 +21,12 @@ data Options = Options { inputLabel             :: String
                        , inputOrder             :: Double
                        , inputWindow            :: Int
                        , inputFasta             :: String
+                       , inputSampleField       :: Int
                        , fastBin                :: Bool
                        , removeN                :: Bool
                        , wholeSeq               :: Bool
                        , list                   :: Bool
+                       , sample                 :: Bool
                        , outputRarefaction      :: String
                        , outputRarefactionCurve :: String
                        , output                 :: String
@@ -58,6 +60,13 @@ options = Options
          <> metavar "FILE"
          <> value ""
          <> help "The fasta file containing the germlines and clones" )
+      <*> option auto
+          ( long "input-sample-field"
+         <> short 'S'
+         <> metavar "INT"
+         <> value 1
+         <> help "The index for the sample ID in the header separated by '|'\
+                 \ (1 indexed)" )
       <*> switch
           ( long "fast-bin"
          <> short 'f'
@@ -77,6 +86,11 @@ options = Options
          <> short 'L'
          <> help "Analyze a diversity of species in a list separated by lines\
                  \ instead of a fasta file" )
+      <*> switch
+          ( long "sample"
+         <> short 's'
+         <> help "Whether to use sample based rarefaction (requires sample ID\
+                 \ field from input-sample-field)" )
       <*> strOption
           ( long "output-rarefaction"
          <> short 'O'
@@ -111,7 +125,12 @@ generateDiversity opts = do
 
         fastaListN   = parseFasta contents
         fastaList    = if nFlag then removeNs fastaListN else fastaListN
-        positionMap  = generatePositionMap whole window fastaList
+        positionMap  = generatePositionMap
+                       (sample opts)
+                       (inputSampleField opts)
+                       whole
+                       window
+                       fastaList
 
     if (null . output $ opts)
         then return ()
@@ -120,12 +139,22 @@ generateDiversity opts = do
            $ positionMap
     if (null . outputRarefaction $ opts)
         then return ()
-        else writeFile (outputRarefaction opts) $
-            printRarefaction (fastBin opts) label window positionMap
+        else writeFile (outputRarefaction opts)
+           $ printRarefaction
+             (sample opts)
+             (fastBin opts)
+             label
+             window
+             positionMap
     if (null . outputRarefactionCurve $ opts)
         then return ()
         else writeFile (outputRarefactionCurve opts) $
-            printRarefactionCurve (fastBin opts) label window positionMap
+            printRarefactionCurve
+            (sample opts)
+            (fastBin opts)
+            label
+            window
+            positionMap
 
 main :: IO ()
 main = execParser opts >>= generateDiversity
