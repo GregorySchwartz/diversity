@@ -9,10 +9,18 @@ must be aligned.
 
 Depends on "fasta": https://github.com/GregorySchwartz/fasta.git 
 
-To install:
-```
+Now on hackage:
 cabal update
-cabal install
+cabal install diversity
+
+Find diversity of each position in a collection of sequences:
+```
+diversity -i input.fasta -o output.csv -w 1 -o 1
+```
+
+Find diversity of a list of entities (a text file with an entity per line)
+```
+diversity -i input.txt -o output.csv -o 1 -L -a
 ```
 
 ```
@@ -20,8 +28,9 @@ Diversity, Gregory W. Schwartz
 
 Usage: diversity [-l|--input-label LABEL] [-r|--input-order [1]|INT]
                  [-w|--input-window [1]|INT] [-i|--input-fasta FILE]
-                 [-f|--fast-bin] [-n|--remove-N] [-a|--whole-sequence]
-                 [-L|--list] [-O|--output-rarefaction FILE]
+                 [-S|--input-sample-field INT] [-f|--fast-bin] [-n|--remove-N]
+                 [-a|--whole-sequence] [-L|--list] [-s|--sample]
+                 [-O|--output-rarefaction FILE]
                  [-c|--output-rarefaction-curve FILE] [-o|--output FILE]
   Return the diversity at each position for all sequences in a fasta file
 
@@ -34,6 +43,9 @@ Available options:
                            The length of the sliding window for generating
                            fragments
   -i,--input-fasta FILE    The fasta file containing the germlines and clones
+  -S,--input-sample-field INT
+                           The index for the sample ID in the header separated
+                           by '|' (1 indexed)
   -f,--fast-bin            Whether to use a much faster, but approximated,
                            binomial coefficient for the rarefaction analysis
   -n,--remove-N            Remove 'N' and 'n' characters
@@ -41,6 +53,8 @@ Available options:
                            sequence for diversity and rarefaction curves.
   -L,--list                Analyze a diversity of species in a list separated by
                            lines instead of a fasta file
+  -s,--sample              Whether to use sample based rarefaction (requires
+                           sample ID field from input-sample-field)
   -O,--output-rarefaction FILE
                            The csv file containing the rarefaction values (the
                            percent of the rarefaction curve that is above 95% of
