@@ -28,8 +28,9 @@ Diversity, Gregory W. Schwartz
 
 Usage: diversity [-l|--input-label LABEL] [-r|--input-order [1]|INT]
                  [-w|--input-window [1]|INT] [-i|--input-fasta FILE]
-                 [-S|--input-sample-field INT] [-f|--fast-bin] [-n|--remove-N]
-                 [-a|--whole-sequence] [-L|--list] [-s|--sample]
+                 [-S|--input-sample-field INT] [-I|--input-subsampling INT INT]
+                 [-f|--fast-bin] [-n|--remove-N] [-a|--whole-sequence]
+                 [-L|--list] [-s|--sample] [-d|--rarefaction-df]
                  [-O|--output-rarefaction FILE]
                  [-c|--output-rarefaction-curve FILE] [-o|--output FILE]
   Return the diversity at each position for all sequences in a fasta file
@@ -46,6 +47,10 @@ Available options:
   -S,--input-sample-field INT
                            The index for the sample ID in the header separated
                            by '|' (1 indexed)
+  -I,--input-subsampling INT INT
+                           The start point and interval of subsamples in the
+                           rarefaction curve. For instance, '1 1' would be 1, 2,
+                           3, ... '2 6' would be 2, 8, 14, ...
   -f,--fast-bin            Whether to use a much faster, but approximated,
                            binomial coefficient for the rarefaction analysis
   -n,--remove-N            Remove 'N' and 'n' characters
@@ -55,6 +60,8 @@ Available options:
                            lines instead of a fasta file
   -s,--sample              Whether to use sample based rarefaction (requires
                            sample ID field from input-sample-field)
+  -d,--rarefaction-df      Whether to output the rarefaction curve as a data
+                           frame
   -O,--output-rarefaction FILE
                            The csv file containing the rarefaction values (the
                            percent of the rarefaction curve that is above 95% of

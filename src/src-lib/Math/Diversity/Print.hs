@@ -5,6 +5,8 @@
 structures into strings for use with writing to output files).
 -}
 
+{-# LANGUAGE BangPatterns #-}
+
 module Math.Diversity.Print ( printDiversity
                             , printRarefaction
                             , printRarefactionCurve ) where
@@ -40,11 +42,13 @@ printDiversity label order window positionMap = header ++ body
 -- to a file
 printRarefaction :: Bool
                  -> Bool
+                 -> Int
+                 -> Int
                  -> Label
                  -> Window
                  -> PositionMap
                  -> String
-printRarefaction sample fastBin label window positionMap =
+printRarefaction sample fastBin start interval label window positionMap =
     header ++ body
   where
     header           = "label,window,position,weight,percent_above\n"
@@ -57,33 +61,48 @@ printRarefaction sample fastBin label window positionMap =
                  , show window
                  , show p
                  , show . length $ xs
-                 , show . rarefactionViable . getRarefactionCurve sample $ xs
+                 , show
+                 . rarefactionViable . map snd . getRarefactionCurve sample $ xs
                  ]
-    getRarefactionCurve True = rarefactionSampleCurve fastBin
-    getRarefactionCurve False = rarefactionCurve fastBin
+    getRarefactionCurve True = rarefactionSampleCurve fastBin start interval
+    getRarefactionCurve False = rarefactionCurve fastBin (fromIntegral start) (fromIntegral interval)
 
 -- Return the results of the rarefaction analysis of the entire curve in
 -- string form for saving to a file
 printRarefactionCurve :: Bool
                       -> Bool
+                      -> Bool
+                      -> Int
+                      -> Int
                       -> Label
                       -> Window
                       -> PositionMap
                       -> String
-printRarefactionCurve sample fastBin label window positionMap =
-    header ++ body
+printRarefactionCurve asDF sample fastBin start interval label window positionMap =
+    header asDF ++ body
   where
-    header           = "label,window,position,weight,curve\n"
+    header False     = "label,window,position,weight,curve\n"
+    header True      = "label,window,position,weight,subsample,vertical_curve\n"
     body             = unlines
                      . map mapLine
                      . M.toAscList
                      $ positionMap
-    mapLine (p, xs) = intercalate "," . line p $ xs
-    line p xs  = [ label
-                 , show window
-                 , show p
-                 , show . length $ xs
-                 , intercalate "/" . map show . getRarefactionCurve sample $ xs
-                 ]
-    getRarefactionCurve True = rarefactionSampleCurve fastBin
-    getRarefactionCurve False = rarefactionCurve fastBin
+    mapLine (!p, !xs) = line asDF p xs
+    line False p xs   = intercalate "," [ label
+                                        , show window
+                                        , show p
+                                        , show . length $ xs
+                                        , intercalate "/" . map (show . snd) . getRarefactionCurve sample $ xs
+                                        ]
+    line True p xs    = intercalate "\n"
+                      . map ( \(!x, !y) -> intercalate "," [ label
+                                                           , show window
+                                                           , show p
+                                                           , show . length $ xs
+                                                           , show x
+                                                           , show y
+                                                           ] )
+                      . getRarefactionCurve sample $ xs
+    getRarefactionCurve True = rarefactionSampleCurve fastBin start interval
+    getRarefactionCurve False =
+        rarefactionCurve fastBin (fromIntegral start) (fromIntegral interval)

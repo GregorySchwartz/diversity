@@ -22,11 +22,13 @@ data Options = Options { inputLabel             :: String
                        , inputWindow            :: Int
                        , inputFasta             :: String
                        , inputSampleField       :: Int
+                       , inputSubsampling       :: String
                        , fastBin                :: Bool
                        , removeN                :: Bool
                        , wholeSeq               :: Bool
                        , list                   :: Bool
                        , sample                 :: Bool
+                       , rarefactionDF          :: Bool
                        , outputRarefaction      :: String
                        , outputRarefactionCurve :: String
                        , output                 :: String
@@ -67,6 +69,14 @@ options = Options
          <> value 1
          <> help "The index for the sample ID in the header separated by '|'\
                  \ (1 indexed)" )
+      <*> strOption
+          ( long "input-subsampling"
+         <> short 'I'
+         <> metavar "INT INT"
+         <> value "1 1"
+         <> help "The start point and interval of subsamples in the\
+                 \ rarefaction curve. For instance, '1 1' would be 1, 2, 3, ...\
+                 \ '2 6' would be 2, 8, 14, ..." )
       <*> switch
           ( long "fast-bin"
          <> short 'f'
@@ -91,6 +101,10 @@ options = Options
          <> short 's'
          <> help "Whether to use sample based rarefaction (requires sample ID\
                  \ field from input-sample-field)" )
+      <*> switch
+          ( long "rarefaction-df"
+         <> short 'd'
+         <> help "Whether to output the rarefaction curve as a data frame" )
       <*> strOption
           ( long "output-rarefaction"
          <> short 'O'
@@ -122,6 +136,8 @@ generateDiversity opts = do
         window       = inputWindow opts
         nFlag        = removeN opts
         whole        = wholeSeq opts
+        start        = read . head . words . inputSubsampling $ opts
+        interval     = read . last . words . inputSubsampling $ opts
 
         fastaListN   = parseFasta contents
         fastaList    = if nFlag then removeNs fastaListN else fastaListN
@@ -143,6 +159,8 @@ generateDiversity opts = do
            $ printRarefaction
              (sample opts)
              (fastBin opts)
+             start
+             interval
              label
              window
              positionMap
@@ -150,8 +168,11 @@ generateDiversity opts = do
         then return ()
         else writeFile (outputRarefactionCurve opts) $
             printRarefactionCurve
+            (rarefactionDF opts)
             (sample opts)
             (fastBin opts)
+            start
+            interval
             label
             window
             positionMap

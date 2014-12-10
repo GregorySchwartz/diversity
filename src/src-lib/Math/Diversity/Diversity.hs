@@ -48,14 +48,20 @@ specialBinomial True n_total g n = choose
                                    (fromIntegral n)
 
 -- | Returns the rarefaction curve for each position in a list
-rarefactionCurve :: (Eq a, Ord a) => Bool -> [a] -> [Double]
-rarefactionCurve fastBin xs = map rarefact [1..n_total]
+rarefactionCurve :: (Eq a, Ord a)
+                 => Bool
+                 -> Integer
+                 -> Integer
+                 -> [a]
+                 -> [(Int, Double)]
+rarefactionCurve fastBin start interval xs =
+    map rarefact [start,(start + interval)..n_total]
   where
     rarefact n
-        | n == 0       = 0
-        | n == 1       = 1
-        | n == n_total = k
-        | otherwise    = k - inner n
+        | n == 0       = (fromIntegral n, 0)
+        | n == 1       = (fromIntegral n, 1)
+        | n == n_total = (fromIntegral n, k)
+        | otherwise    = (fromIntegral n, k - inner n)
     inner n = ( \x -> if fastBin
                         then x / choose (fromIntegral n_total) (fromIntegral n)
                         else x )
@@ -74,13 +80,19 @@ getSampleContents = map (Set.fromList . map snd)
                   . map (\(!x, !y) -> (x, y))
 
 -- | Returns the rarefaction curve for each position in a list
-rarefactionSampleCurve :: (Ord a, Ord b) => Bool -> [(a, b)] -> [Double]
-rarefactionSampleCurve fastBin ls = map rarefact [1..t_total]
+rarefactionSampleCurve :: (Ord a, Ord b)
+                       => Bool
+                       -> Int
+                       -> Int
+                       -> [(a, b)]
+                       -> [(Int, Double)]
+rarefactionSampleCurve fastBin start interval ls =
+    map rarefact [start,(start + interval)..t_total]
   where
     rarefact t
-        | t == 0       = 0
-        | t == t_total = richness
-        | otherwise    = richness - inner t
+        | t == 0       = (t, 0)
+        | t == t_total = (t, richness)
+        | otherwise    = (t, richness - inner t)
     inner t = ( \x -> if fastBin
                         then x / choose t_total t
                         else x )
