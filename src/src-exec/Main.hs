@@ -76,7 +76,8 @@ options = Options
          <> value "1 1"
          <> help "The start point and interval of subsamples in the\
                  \ rarefaction curve. For instance, '1 1' would be 1, 2, 3, ...\
-                 \ '2 6' would be 2, 8, 14, ..." )
+                 \ '2 6' would be 2, 8, 14, ... Note: input is a string so\
+                 \ use quotations around the entry" )
       <*> switch
           ( long "fast-bin"
          <> short 'f'

@@ -16,7 +16,6 @@ module Math.Diversity.Diversity ( hamming
 import Data.List
 import Data.Ratio
 import qualified Data.Set as Set
-import qualified Data.Foldable as F
 import Numeric.SpecFunctions (choose)
 import Data.Function (on)
 
@@ -77,7 +76,6 @@ getSampleContents :: (Ord a, Ord b) => [(a, b)] -> [Set.Set b]
 getSampleContents = map (Set.fromList . map snd)
                   . groupBy ((==) `on` fst)
                   . sortBy (compare `on` fst)
-                  . map (\(!x, !y) -> (x, y))
 
 -- | Returns the rarefaction curve for each position in a list
 rarefactionSampleCurve :: (Ord a, Ord b)
@@ -93,21 +91,21 @@ rarefactionSampleCurve fastBin start interval ls =
         | t == 0       = (t, 0)
         | t == t_total = (t, richness)
         | otherwise    = (t, richness - inner t)
-    inner t = ( \x -> if fastBin
-                        then x / choose t_total t
-                        else x )
-            . F.sum
-            . Set.map ( \s -> specialBinomial
+    inner t     = ( \x -> if fastBin
+                            then x / choose t_total t
+                            else x )
+                . sum
+                . map ( \s -> specialBinomial
                               fastBin
                               (fromIntegral t_total)
                               (numHave s samples)
                               (fromIntegral t) )
-            $ speciesList
-    numHave s = sum . map (\x -> if Set.member s x then 1 else 0)
-    richness = fromIntegral . Set.size $ speciesList
-    speciesList = Set.fromList . map snd $ ls
-    t_total = genericLength samples
-    samples = getSampleContents ls
+                $ speciesList
+    numHave s   = sum . map (\x -> if Set.member s x then 1 else 0)
+    richness    = genericLength speciesList
+    speciesList = nub . map snd $ ls
+    t_total     = genericLength samples
+    samples     = getSampleContents ls
 
 -- | Calculates the percent of the curve that is above 95% of height of the curve
 rarefactionViable :: [Double] -> Double
