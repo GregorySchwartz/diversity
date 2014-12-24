@@ -9,9 +9,11 @@ must be aligned.
 
 Depends on "fasta": https://github.com/GregorySchwartz/fasta.git 
 
-Now on hackage:
+Now on hackage, so you can install with just (need cabal-install and ghc):
+```
 cabal update
 cabal install diversity
+```
 
 Find diversity of each position in a collection of sequences:
 ```
