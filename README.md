@@ -9,19 +9,125 @@ must be aligned.
 
 Depends on "fasta": https://github.com/GregorySchwartz/fasta.git 
 
-Now on hackage:
+# Citations
+
+*For an overview of diversity*
+
+[Entropy and diversity](http://onlinelibrary.wiley.com/doi/10.1111/j.2006.0030-1299.14714.x/abstract)
+
+*For a positional and sliding window use case that uses this program*
+
+[Conserved variation: identifying patterns of stability and variability in BCR
+and TCR V genes with different diversity and richness metrics](http://www.ncbi.nlm.nih.gov/pubmed/23735612)
+
+[Germline Amino Acid Diversity in B Cell Receptors is a Good Predictor of
+Somatic Selection Pressures](http://www.ncbi.nlm.nih.gov/pubmed/24265630)
+
+# Installation
+
+We should always be using sandboxes with cabal, so let's make a directory for
+the binary and create a sandbox:
+
+```
+mkdir diversity
+cd diversity
+cabal sandbox init
+```
+
+Now we can easily update cabal and install the package!
+
+```
 cabal update
 cabal install diversity
+```
 
-Find diversity of each position in a collection of sequences:
+The binary will be found at ./.cabal-sandbox/bin/diversity
+
+# Quick Tutorial
+
+Let's say we have a bunch of made up sequences,
+
+```
+>1
+AAT
+>2
+AAT
+>3
+A-G
+>4
+--G
+>5
+TCG
+>6
+TTG
+>7
+TAG
+>8
+GGG
+```
+
+that we want to know the diversity of at each position. We can put those
+sequences in a file `input.fasta` and check the diversity at each position:
+
 ```
 diversity -i input.fasta -o output.csv -w 1 -o 1
 ```
 
-Find diversity of a list of entities (a text file with an entity per line)
+We can see in `output.csv` that each position has a diversity associated with
+it. This diversity is calculated using order 1 in this case with a window length
+of 1, meaning that at each position we are looking at a single character, in
+this case a nucleotide. Gaps are ignored at each position.
+
+Now, what if we wanted to find the diversity using a sliding window of two
+nucleotides? That is, position 1 would analyze `AA AA AG N/A TC TT TA GG`, where
+gaps are artificial and so we skip over them and we don't start on a gap. We can
+achieve this by setting the window length to 2:
+
 ```
-diversity -i input.txt -o output.csv -o 1 -L -a
+diversity -i input.fasta -o output.csv -w 2 -o 1
 ```
+
+The output is similar, but now there are only positions 1 and 2 as we cannot
+start at 3 if there is no fragment of length 2 or more. If we wanted to look at
+the entire sequence, we could forego the `-w` flag and just use `a` to treat the
+entire sequence as a single fragment. This analysis would be useful for just
+finding the diversity of a collection of sequences ignoring position.
+
+We can also find the diversity of any kind of entity: say we had `input.txt`
+containing:
+
+```
+cat
+cat
+cat
+dog
+dog
+cat
+parrot
+```
+
+We can find the diversity of species in this file using:
+
+```
+diversity -i input.txt -o output.csv -L -a
+```
+
+We are saying that we just have a list of entities separated by line (`-L`) and
+we want to look at the entire entity, not positional (`-a`).
+
+To look at the rarefaction curves and see if we have sampled enough species, we
+can use
+
+```
+diversity -i input.txt -o output.csv -c rarefaction_output.csv -L -a
+```
+
+to get the rarefaction curve at each position (in this case just the entire
+entity). We can use `-f` to speed up this calculation, but at the cost of
+accuracy. In addition, `-f` cannot work on large data sets (they will show up as
+NaN).
+
+# Usage
 
 ```
 Diversity, Gregory W. Schwartz
