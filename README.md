@@ -9,13 +9,13 @@ must be aligned.
 
 Depends on "fasta": https://github.com/GregorySchwartz/fasta.git 
 
-# Citations
+## Citations
 
-*For an overview of diversity*
+**For an overview of diversity**
 
 [Entropy and diversity](http://onlinelibrary.wiley.com/doi/10.1111/j.2006.0030-1299.14714.x/abstract)
 
-*For a positional and sliding window use case that uses this program*
+**For a positional and sliding window use case that uses this program**
 
 [Conserved variation: identifying patterns of stability and variability in BCR
 and TCR V genes with different diversity and richness metrics](http://www.ncbi.nlm.nih.gov/pubmed/23735612)
@@ -23,7 +23,7 @@ and TCR V genes with different diversity and richness metrics](http://www.ncbi.n
 [Germline Amino Acid Diversity in B Cell Receptors is a Good Predictor of
 Somatic Selection Pressures](http://www.ncbi.nlm.nih.gov/pubmed/24265630)
 
-# Installation
+## Installation
 
 We should always be using sandboxes with cabal, so let's make a directory for
 the binary and create a sandbox:
@@ -43,7 +43,7 @@ cabal install diversity
 
 The binary will be found at ./.cabal-sandbox/bin/diversity
 
-# Quick Tutorial
+## Quick Tutorial
 
 Let's say we have a bunch of made up sequences,
 
@@ -127,7 +127,7 @@ entity). We can use `-f` to speed up this calculation, but at the cost of
 accuracy. In addition, `-f` cannot work on large data sets (they will show up as
 NaN).
 
-# Usage
+## Usage
 
 ```
 Diversity, Gregory W. Schwartz
