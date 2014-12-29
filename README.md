@@ -18,7 +18,7 @@ Depends on "fasta": https://github.com/GregorySchwartz/fasta.git
 **For a positional and sliding window use case that uses this program**
 
 [Conserved variation: identifying patterns of stability and variability in BCR
-and TCR V genes with different diversity and richness metrics](http://www.ncbi.nlm.nih.gov/pubmed/23735612)
+and TCR V genes with different diversity and richness metrics](http://www.ncbi.nlm.nih.gov/pubmed/23735612) (cite this paper if using this program)
 
 [Germline Amino Acid Diversity in B Cell Receptors is a Good Predictor of
 Somatic Selection Pressures](http://www.ncbi.nlm.nih.gov/pubmed/24265630)
