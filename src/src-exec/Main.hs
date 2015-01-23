@@ -157,28 +157,16 @@ generateDiversity opts = do
                        window
                        fastaList
 
+        howToOutput x = if std opts then putStrLn else writeFile x
+
     if (null . output $ opts)
-        then
-            if std opts
-                then putStrLn $ printDiversity label order window positionMap
-                else return ()
-        else writeFile (output opts)
+        then return ()
+        else howToOutput (output opts)
            . printDiversity label order window
            $ positionMap
     if (null . outputRarefaction $ opts)
-        then
-            if std opts
-                then putStrLn
-                   $ printRarefaction
-                     (sample opts)
-                     (fastBin opts)
-                     start
-                     interval
-                     label
-                     window
-                     positionMap
-                else return ()
-        else writeFile (outputRarefaction opts)
+        then return ()
+        else howToOutput (outputRarefaction opts)
            $ printRarefaction
              (sample opts)
              (fastBin opts)
@@ -188,29 +176,17 @@ generateDiversity opts = do
              window
              positionMap
     if (null . outputRarefactionCurve $ opts)
-        then
-            if std opts
-                then putStrLn
-                   $ printRarefactionCurve
-                     (rarefactionDF opts)
-                     (sample opts)
-                     (fastBin opts)
-                     start
-                     interval
-                     label
-                     window
-                     positionMap
-                else return ()
-        else writeFile (outputRarefactionCurve opts) $
-            printRarefactionCurve
-            (rarefactionDF opts)
-            (sample opts)
-            (fastBin opts)
-            start
-            interval
-            label
-            window
-            positionMap
+        then return ()
+        else howToOutput (outputRarefactionCurve opts)
+           $ printRarefactionCurve
+             (rarefactionDF opts)
+             (sample opts)
+             (fastBin opts)
+             start
+             interval
+             label
+             window
+             positionMap
 
 main :: IO ()
 main = execParser opts >>= generateDiversity
