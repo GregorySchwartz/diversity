@@ -29,6 +29,7 @@ data Options = Options { inputLabel             :: String
                        , list                   :: Bool
                        , sample                 :: Bool
                        , rarefactionDF          :: Bool
+                       , std                    :: Bool
                        , outputRarefaction      :: String
                        , outputRarefactionCurve :: String
                        , output                 :: String
@@ -106,6 +107,11 @@ options = Options
           ( long "rarefaction-df"
          <> short 'd'
          <> help "Whether to output the rarefaction curve as a data frame" )
+      <*> switch
+          ( long "std"
+         <> short 't'
+         <> help "Whether to output to stdout or to a file if no file is\
+                 \ supplied" )
       <*> strOption
           ( long "output-rarefaction"
          <> short 'O'
@@ -129,7 +135,9 @@ options = Options
 
 generateDiversity :: Options -> IO ()
 generateDiversity opts = do
-    contentsFile <- readFile . inputFasta $ opts
+    contentsFile    <- if (null . inputFasta $ opts)
+                        then getContents
+                        else readFile . inputFasta $ opts
     let lineIt       = unlines . (:) ">" . intersperse ">" . lines
         contents     = if (list opts) then lineIt contentsFile else contentsFile
         label        = inputLabel opts
@@ -150,12 +158,26 @@ generateDiversity opts = do
                        fastaList
 
     if (null . output $ opts)
-        then return ()
+        then
+            if std opts
+                then putStrLn $ printDiversity label order window positionMap
+                else return ()
         else writeFile (output opts)
            . printDiversity label order window
            $ positionMap
     if (null . outputRarefaction $ opts)
-        then return ()
+        then
+            if std opts
+                then putStrLn
+                   $ printRarefaction
+                     (sample opts)
+                     (fastBin opts)
+                     start
+                     interval
+                     label
+                     window
+                     positionMap
+                else return ()
         else writeFile (outputRarefaction opts)
            $ printRarefaction
              (sample opts)
@@ -166,7 +188,19 @@ generateDiversity opts = do
              window
              positionMap
     if (null . outputRarefactionCurve $ opts)
-        then return ()
+        then
+            if std opts
+                then putStrLn
+                   $ printRarefactionCurve
+                     (rarefactionDF opts)
+                     (sample opts)
+                     (fastBin opts)
+                     start
+                     interval
+                     label
+                     window
+                     positionMap
+                else return ()
         else writeFile (outputRarefactionCurve opts) $
             printRarefactionCurve
             (rarefactionDF opts)
