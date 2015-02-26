@@ -119,19 +119,22 @@ options = Options
          <> value ""
          <> help "The csv file containing the rarefaction values (the percent\
                  \ of the rarefaction curve that is above 95% of the height of\
-                 \ the rarefaction curve)" )
+                 \ the rarefaction curve). Expects a string, so you need a\
+                 \ string even with std" )
       <*> strOption
           ( long "output-rarefaction-curve"
          <> short 'c'
          <> metavar "FILE"
          <> value ""
-         <> help "The csv file containing the rarefaction curve" )
+         <> help "The csv file containing the rarefaction curve. Expects a\
+                 \ a string, so you need a string even with std" )
       <*> strOption
           ( long "output"
          <> short 'o'
          <> metavar "FILE"
          <> value ""
-         <> help "The csv file containing the diversities at each position" )
+         <> help "The csv file containing the diversities at each position.\
+                 \ expects a string, so you need a string wven with std" )
 
 generateDiversity :: Options -> IO ()
 generateDiversity opts = do
