@@ -54,7 +54,7 @@ rarefactionCurve :: (Eq a, Ord a)
                  -> [a]
                  -> [(Int, Double)]
 rarefactionCurve fastBin start interval xs =
-    map rarefact [start,(start + interval)..n_total]
+    map rarefact $ [start,(start + interval)..(n_total - 1)] ++ [n_total]
   where
     rarefact n
         | n == 0       = (fromIntegral n, 0)
@@ -85,7 +85,7 @@ rarefactionSampleCurve :: (Ord a, Ord b)
                        -> [(a, b)]
                        -> [(Int, Double)]
 rarefactionSampleCurve fastBin start interval ls =
-    map rarefact [start,(start + interval)..t_total]
+    map rarefact $ [start,(start + interval)..(t_total - 1)] ++ [t_total]
   where
     rarefact t
         | t == 0       = (t, 0)

@@ -78,7 +78,8 @@ options = Options
          <> help "The start point and interval of subsamples in the\
                  \ rarefaction curve. For instance, '1 1' would be 1, 2, 3, ...\
                  \ '2 6' would be 2, 8, 14, ... Note: input is a string so\
-                 \ use quotations around the entry" )
+                 \ use quotations around the entry and it always has the\
+                 \ number of subsamples overall as the last point" )
       <*> switch
           ( long "fast-bin"
          <> short 'f'
