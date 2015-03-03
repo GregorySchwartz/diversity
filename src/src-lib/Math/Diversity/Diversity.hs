@@ -23,6 +23,16 @@ import Data.Function (on)
 hamming :: String -> String -> Int
 hamming xs ys = length $ filter not $ zipWith (==) xs ys
 
+-- | Fast product division
+productDivision :: Double -> [Integer] -> [Integer] -> Double
+productDivision acc [] []     = acc
+productDivision acc [] (y:ys) = (acc / fromInteger y)
+                              * productDivision acc [] ys
+productDivision acc (x:xs) [] = acc * fromInteger x * productDivision acc xs []
+productDivision acc (x:xs) (y:ys)
+    | x == y    = productDivision acc xs ys
+    | otherwise = (fromInteger x / fromInteger y) * productDivision acc xs ys
+
 -- | Returns the diversity of a list of things
 diversity :: (Ord b) => Double -> [b] -> Double
 diversity order sample
@@ -39,9 +49,10 @@ diversity order sample
 -- | Binomial for small or large numbers (slow but works for big numbers,
 -- fast but works for small numbers)
 specialBinomial :: Bool -> Integer -> Integer -> Integer -> Double
-specialBinomial False n_total g n = fromRational
-    $ product [(n_total - g - n + 1)..(n_total - g)]
-    % product [(n_total - n + 1)..n_total]
+specialBinomial False n_total g n = productDivision 1 num den
+  where
+    num = [(n_total - g - n + 1)..(n_total - g)]
+    den = [(n_total - n + 1)..n_total]
 specialBinomial True n_total g n = choose
                                    (fromIntegral n_total - fromIntegral g)
                                    (fromIntegral n)
