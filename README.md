@@ -125,7 +125,19 @@ diversity -i input.txt -o output.csv -c rarefaction_output.csv -L -a
 to get the rarefaction curve at each position (in this case just the entire
 entity). We can use `-f` to speed up this calculation, but at the cost of
 accuracy. In addition, `-f` cannot work on large data sets (they will show up as
-NaN).
+NaN). The output for the curve is similar to the diversity output, with label,
+window, position, and weight columns. However, there are two additional columns:
+subsample and vertical_curve. The rarefaction curve tells us if we have
+sufficiently sampled enough if the curve plateaus. To check if the curve levels
+off, we can plot the subsample column as the x axis and the vertical_curve
+column as the y axis. The other file contains a percent_above column, which
+tells us the percent of subsamples that are above 95% of the height of the
+curve. This can give us a quick glance at the curve to know if the curve
+"plateaus" (unless there are NaNs, which result in a nonsense percentage). You
+must be careful when looking at this percentage, however, as it might be high
+due to a very low number of sequences, say 2 or 3, as it's a percent of those
+low values so it might be artificially high in those cases, but you can tell by
+the weight.
 
 ## Usage
 
