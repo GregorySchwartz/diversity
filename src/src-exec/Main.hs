@@ -84,7 +84,9 @@ options = Options
           ( long "fast-bin"
          <> short 'f'
          <> help "Whether to use a much faster, but approximated, binomial\
-                 \ coefficient for the rarefaction analysis" )
+                 \ coefficient for the rarefaction analysis. This method\
+                 \ results in NaNs for larger numbers, so in that case you\
+                 \ you should use the slower, more accurate default method" )
       <*> switch
           ( long "remove-N"
          <> short 'n'

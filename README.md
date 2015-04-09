@@ -149,7 +149,7 @@ Usage: diversity [-l|--input-label LABEL] [-r|--input-order [1]|INT]
                  [-w|--input-window [1]|INT] [-i|--input-fasta FILE]
                  [-S|--input-sample-field INT] [-I|--input-subsampling INT INT]
                  [-f|--fast-bin] [-n|--remove-N] [-a|--whole-sequence]
-                 [-L|--list] [-s|--sample] [-d|--rarefaction-df]
+                 [-L|--list] [-s|--sample] [-d|--rarefaction-df] [-t|--std]
                  [-O|--output-rarefaction FILE]
                  [-c|--output-rarefaction-curve FILE] [-o|--output FILE]
   Return the diversity at each position for all sequences in a fasta file
@@ -169,9 +169,15 @@ Available options:
   -I,--input-subsampling INT INT
                            The start point and interval of subsamples in the
                            rarefaction curve. For instance, '1 1' would be 1, 2,
-                           3, ... '2 6' would be 2, 8, 14, ...
+                           3, ... '2 6' would be 2, 8, 14, ... Note: input is a
+                           string so use quotations around the entry and it
+                           always has the number of subsamples overall as the
+                           last point
   -f,--fast-bin            Whether to use a much faster, but approximated,
-                           binomial coefficient for the rarefaction analysis
+                           binomial coefficient for the rarefaction analysis.
+                           This method results in NaNs for larger numbers, so in
+                           that case you you should use the slower, more
+                           accurate default method
   -n,--remove-N            Remove 'N' and 'n' characters
   -a,--whole-sequence      Ignore window length and only analyze the entire
                            sequence for diversity and rarefaction curves.
@@ -181,12 +187,18 @@ Available options:
                            sample ID field from input-sample-field)
   -d,--rarefaction-df      Whether to output the rarefaction curve as a data
                            frame
+  -t,--std                 Whether to output to stdout or to a file if no file
+                           is supplied
   -O,--output-rarefaction FILE
                            The csv file containing the rarefaction values (the
                            percent of the rarefaction curve that is above 95% of
-                           the height of the rarefaction curve)
+                           the height of the rarefaction curve). Expects a
+                           string, so you need a string even with std
   -c,--output-rarefaction-curve FILE
-                           The csv file containing the rarefaction curve
+                           The csv file containing the rarefaction curve.
+                           Expects a a string, so you need a string even with
+                           std
   -o,--output FILE         The csv file containing the diversities at each
-                           position
+                           position. expects a string, so you need a string wven
+                           with std
 ```
