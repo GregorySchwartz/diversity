@@ -4,8 +4,6 @@
 {- | Collection of functions pertaining to finding the diversity of samples.
 -}
 
-{-# LANGUAGE BangPatterns #-}
-
 module Math.Diversity.Diversity ( hamming
                                 , diversity
                                 , rarefactionCurve
@@ -14,7 +12,6 @@ module Math.Diversity.Diversity ( hamming
 
 -- Built-in
 import Data.List
-import Data.Ratio
 import qualified Data.Set as Set
 import Numeric.SpecFunctions (choose)
 import Data.Function (on)
