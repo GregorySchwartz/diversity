@@ -4,6 +4,8 @@
 {- | Collection of functions pertaining to finding the diversity of samples.
 -}
 
+{-# LANGUAGE BangPatterns #-}
+
 module Math.Diversity.Diversity ( hamming
                                 , diversity
                                 , rarefactionCurve
@@ -15,6 +17,9 @@ import Data.List
 import qualified Data.Set as Set
 import Numeric.SpecFunctions (choose)
 import Data.Function (on)
+
+-- Local
+import Math.Diversity.RandomSampling
 
 -- | Takes two strings, returns Hamming distance
 hamming :: String -> String -> Int
@@ -57,18 +62,23 @@ specialBinomial True n_total g n = choose
 -- | Returns the rarefaction curve for each position in a list
 rarefactionCurve :: (Eq a, Ord a)
                  => Bool
+                 -> Int
                  -> Integer
                  -> Integer
                  -> [a]
-                 -> [(Int, Double)]
-rarefactionCurve fastBin start interval xs =
-    map rarefact $ [start,(start + interval)..(n_total - 1)] ++ [n_total]
+                 -> IO [(Int, (Double, Double))]
+rarefactionCurve !fastBin !runs !start !interval !xs =
+        mapM rarefact $ [start,(start + interval)..(n_total - 1)] ++ [n_total]
   where
-    rarefact n
-        | n == 0       = (fromIntegral n, 0)
-        | n == 1       = (fromIntegral n, 1)
-        | n == n_total = (fromIntegral n, k)
-        | otherwise    = (fromIntegral n, k - inner n)
+    rarefact !n
+        | n == 0       = return (fromIntegral n, (0, 0))
+        | n == 1       = return (fromIntegral n, (1, 0))
+        | n == n_total = return (fromIntegral n, (k, 0))
+        | runs == 0    = return (fromIntegral n, (k - inner n, 0))
+        | otherwise    = do
+            statTuple <-
+                subsampleES runs (fromIntegral n_total) (fromIntegral n) xs
+            return (fromIntegral n, statTuple)
     inner n = ( \x -> if fastBin
                         then x / choose (fromIntegral n_total) (fromIntegral n)
                         else x )
@@ -91,14 +101,14 @@ rarefactionSampleCurve :: (Ord a, Ord b)
                        -> Int
                        -> Int
                        -> [(a, b)]
-                       -> [(Int, Double)]
-rarefactionSampleCurve fastBin start interval ls =
-    map rarefact $ [start,(start + interval)..(t_total - 1)] ++ [t_total]
+                       -> IO [(Int, (Double, Double))]
+rarefactionSampleCurve !fastBin !start !interval !ls =
+    mapM rarefact $ [start,(start + interval)..(t_total - 1)] ++ [t_total]
   where
-    rarefact t
-        | t == 0       = (t, 0)
-        | t == t_total = (t, richness)
-        | otherwise    = (t, richness - inner t)
+    rarefact !t
+        | t == 0       = return (t, (0, 0))
+        | t == t_total = return (t, (richness, 0))
+        | otherwise    = return (t, (richness - inner t, 0))
     inner t     = ( \x -> if fastBin
                             then x / choose t_total t
                             else x )
@@ -117,6 +127,6 @@ rarefactionSampleCurve fastBin start interval ls =
 
 -- | Calculates the percent of the curve that is above 95% of height of the curve
 rarefactionViable :: [Double] -> Double
-rarefactionViable xs = (genericLength valid / genericLength xs) * 100
+rarefactionViable !xs = (genericLength valid / genericLength xs) * 100
   where
     valid = dropWhile (< (0.95 * last xs)) xs

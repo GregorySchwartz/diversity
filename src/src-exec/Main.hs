@@ -24,6 +24,7 @@ data Options = Options { inputLabel             :: String
                        , inputSampleField       :: Int
                        , inputSubsampling       :: String
                        , fastBin                :: Bool
+                       , runs                   :: Int
                        , removeN                :: Bool
                        , wholeSeq               :: Bool
                        , list                   :: Bool
@@ -87,6 +88,17 @@ options = Options
                  \ coefficient for the rarefaction analysis. This method\
                  \ results in NaNs for larger numbers, so in that case you\
                  \ you should use the slower, more accurate default method" )
+      <*> option auto
+          ( long "input-runs"
+         <> short 'R'
+         <> metavar "INT"
+         <> value 0
+         <> help "The number of runs for empirical resampling rarefaction.\
+                 \ This method does not compute the theoretical, it reports the\
+                 \ actual median and median absolute deviation (MAD) values of\
+                 \ this many runs. If this value is not 0, empirical\
+                 \ rarefaction is automatically enabled (individual based only,\
+                 \ not for sample based)" )
       <*> switch
           ( long "remove-N"
          <> short 'n'
@@ -141,11 +153,11 @@ options = Options
 
 generateDiversity :: Options -> IO ()
 generateDiversity opts = do
-    contentsFile    <- if (null . inputFasta $ opts)
+    contentsFile    <- if null . inputFasta $ opts
                         then getContents
                         else readFile . inputFasta $ opts
     let lineIt       = unlines . (:) ">" . intersperse ">" . lines
-        contents     = if (list opts) then lineIt contentsFile else contentsFile
+        contents     = if list opts then lineIt contentsFile else contentsFile
         label        = inputLabel opts
         order        = inputOrder opts
         window       = inputWindow opts
@@ -172,27 +184,31 @@ generateDiversity opts = do
            $ positionMap
     if (null . outputRarefaction $ opts)
         then return ()
-        else howToOutput (outputRarefaction opts)
-           $ printRarefaction
-             (sample opts)
-             (fastBin opts)
-             start
-             interval
-             label
-             window
-             positionMap
+        else do
+            s <- printRarefaction
+                 (sample opts)
+                 (fastBin opts)
+                 (runs opts)
+                 start
+                 interval
+                 label
+                 window
+                 positionMap
+            howToOutput (outputRarefaction opts) s
     if (null . outputRarefactionCurve $ opts)
         then return ()
-        else howToOutput (outputRarefactionCurve opts)
-           $ printRarefactionCurve
-             (rarefactionDF opts)
-             (sample opts)
-             (fastBin opts)
-             start
-             interval
-             label
-             window
-             positionMap
+        else do
+            s <- printRarefactionCurve
+                 (rarefactionDF opts)
+                 (sample opts)
+                 (fastBin opts)
+                 (runs opts)
+                 start
+                 interval
+                 label
+                 window
+                 positionMap
+            howToOutput (outputRarefactionCurve opts) s
 
 main :: IO ()
 main = execParser opts >>= generateDiversity
