@@ -177,6 +177,8 @@ generateDiversity opts = do
 
         howToOutput x = if std opts then putStrLn else writeFile x
 
+    print positionMap
+
     if (null . output $ opts)
         then return ()
         else howToOutput (output opts)
@@ -216,5 +218,4 @@ main = execParser opts >>= generateDiversity
     opts = info (helper <*> options)
       ( fullDesc
      <> progDesc "Return the diversity at each position for all sequences in a\
-                 \ fasta file"
-     <> header "Diversity, Gregory W. Schwartz" )
+                 \ fasta file" )

@@ -8,6 +8,7 @@
 
 module Math.Diversity.Diversity ( hamming
                                 , diversity
+                                , diversityOfMap
                                 , rarefactionCurve
                                 , rarefactionSampleCurve
                                 , rarefactionViable ) where
@@ -15,11 +16,13 @@ module Math.Diversity.Diversity ( hamming
 -- Built-in
 import Data.List
 import qualified Data.Set as Set
+import qualified Data.Map.Strict as Map
 import Numeric.SpecFunctions (choose)
 import Data.Function (on)
 
 -- Local
 import Math.Diversity.RandomSampling
+import Math.Diversity.Types
 
 -- | Takes two strings, returns Hamming distance
 hamming :: String -> String -> Int
@@ -39,14 +42,37 @@ productDivision acc (x:xs) (y:ys)
 diversity :: (Ord b) => Double -> [b] -> Double
 diversity order sample
     | null sample        = 0
-    | order == 1         = exp . h $ speciesList
-    | otherwise          = (sum . map ((** order) . p_i) $ speciesList) ** pow
+    | order == 1         = exp . h . speciesList $ sample
+    | otherwise          = ( Map.foldl' (+) 0
+                           . Map.map ((** order) . p_i)
+                           . speciesList
+                           $ sample )
+                        ** pow
   where
     pow          = 1 / (1 - order)
-    h            = negate . sum . map (\x -> p_i x * log (p_i x))
-    p_i x        = ((fromIntegral . length $ x) :: Double) /
-                   ((fromIntegral . length $ sample) :: Double)
-    speciesList  = group . sort $ sample
+    h            = negate
+                 . Map.foldl' (+) 0
+                 . Map.map (\x -> p_i x * log (p_i x))
+    p_i x        = (x :: Double) /
+                   ((Map.foldl' (+) 0 . speciesList $ sample) :: Double)
+    speciesList  = Map.fromListWith (+) . map (\x -> (x, 1))
+
+-- | Returns the diversity of a map of things
+diversityOfMap :: Double -> Map.Map (Sample, Fragment) Int -> Double
+diversityOfMap order sample
+    | Map.null sample    = 0
+    | order == 1         = exp . h $ sample
+    | otherwise          = ( Map.foldl' (+) 0
+                           . Map.map ((** order) . p_i)
+                           $ sample )
+                        ** pow
+  where
+    pow          = 1 / (1 - order)
+    h            = negate
+                 . Map.foldl' (+) 0
+                 . Map.map (\x -> p_i (fromIntegral x) * log (p_i (fromIntegral x)))
+    p_i x        = (fromIntegral x :: Double) /
+                   (fromIntegral (Map.foldl' (+) 0 sample) :: Double)
 
 -- | Binomial for small or large numbers (slow but works for big numbers,
 -- fast but works for small numbers)
@@ -60,12 +86,11 @@ specialBinomial True n_total g n = choose
                                    (fromIntegral n)
 
 -- | Returns the rarefaction curve for each position in a list
-rarefactionCurve :: (Eq a, Ord a)
-                 => Bool
+rarefactionCurve :: Bool
                  -> Int
                  -> Integer
                  -> Integer
-                 -> [a]
+                 -> Map.Map (Sample, Fragment) Int
                  -> IO [(Int, (Double, Double))]
 rarefactionCurve !fastBin !runs !start !interval !xs =
         mapM rarefact $ [start,(start + interval)..(n_total - 1)] ++ [n_total]
@@ -76,31 +101,30 @@ rarefactionCurve !fastBin !runs !start !interval !xs =
         | n == n_total = return (fromIntegral n, (k, 0))
         | runs == 0    = return (fromIntegral n, (k - inner n, 0))
         | otherwise    = do
-            statTuple <-
-                subsampleES runs (fromIntegral n_total) (fromIntegral n) xs
+            statTuple <- subsampleES runs (fromIntegral n_total) (fromIntegral n) . concatMap snd . Map.toAscList . Map.mapWithKey (\(s, f) x -> replicate x f) $ xs
             return (fromIntegral n, statTuple)
     inner n = ( \x -> if fastBin
                         then x / choose (fromIntegral n_total) (fromIntegral n)
                         else x )
             . sum
-            . map (\g -> specialBinomial fastBin n_total g n)
+            . map (\g -> specialBinomial fastBin n_total (fromIntegral g) n)
             $ grouped
-    n_total = genericLength xs
-    k       = genericLength grouped
-    grouped = map genericLength . group . sort $ xs
+    n_total = fromIntegral . Map.foldl' (+) 0 $ xs
+    k       = fromIntegral . Map.size $ xs
+    grouped = Map.elems xs
 
 -- | Each sample has a collection of species, return a list of these maps
-getSampleContents :: (Ord a, Ord b) => [(a, b)] -> [Set.Set b]
-getSampleContents = map (Set.fromList . map snd)
-                  . groupBy ((==) `on` fst)
-                  . sortBy (compare `on` fst)
+getSampleContents :: Map.Map (Sample, Fragment) Int -> [Set.Set Fragment]
+getSampleContents = Map.elems
+                  . Map.fromListWith Set.union
+                  . map (\(x, y) -> (x, Set.singleton y))
+                  . Map.keys
 
 -- | Returns the rarefaction curve for each position in a list
-rarefactionSampleCurve :: (Ord a, Ord b)
-                       => Bool
+rarefactionSampleCurve :: Bool
                        -> Int
                        -> Int
-                       -> [(a, b)]
+                       -> Map.Map (Sample, Fragment) Int
                        -> IO [(Int, (Double, Double))]
 rarefactionSampleCurve !fastBin !start !interval !ls =
     mapM rarefact $ [start,(start + interval)..(t_total - 1)] ++ [t_total]
@@ -121,7 +145,7 @@ rarefactionSampleCurve !fastBin !start !interval !ls =
                 $ speciesList
     numHave s   = sum . map (\x -> if Set.member s x then 1 else 0)
     richness    = genericLength speciesList
-    speciesList = nub . map snd $ ls
+    speciesList = map snd . Map.keys $ ls
     t_total     = genericLength samples
     samples     = getSampleContents ls
 

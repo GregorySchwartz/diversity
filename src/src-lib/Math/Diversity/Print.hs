@@ -13,7 +13,7 @@ module Math.Diversity.Print ( printDiversity
 
 -- Built in
 import Data.List
-import qualified Data.Map as M
+import qualified Data.Map.Strict as Map
 
 -- Local
 import Math.Diversity.Types
@@ -27,15 +27,15 @@ printDiversity label order window positionMap = header ++ body
     header           = "label,order,window,position,weight,diversity\n"
     body             = unlines
                      . map mapLine
-                     . M.toAscList
+                     . Map.toAscList
                      $ positionMap
     mapLine (p, xs) = intercalate "," . line p $ xs
     line p xs = [ label
                 , show order
                 , show window
                 , show p
-                , show . length $ xs
-                , show . diversity order $ xs
+                , show . Map.foldl' (+) 0 $ xs
+                , show . diversityOfMap order $ xs
                 ]
 
 -- Return the results of the rarefaction analysis in string form for saving
@@ -51,7 +51,7 @@ printRarefaction :: Bool
                  -> IO String
 printRarefaction
     sample fastBin runs start interval label window positionMap = do
-    body <- fmap unlines . mapM mapLine . M.toAscList $ positionMap
+    body <- fmap unlines . mapM mapLine . Map.toAscList $ positionMap
     return (header ++ body)
   where
     header           = "label,window,position,weight,percent_above\n"
@@ -61,7 +61,7 @@ printRarefaction
         return [ label
                , show window
                , show p
-               , show . length $ xs
+               , show . Map.size $ xs
                , show . rarefactionViable . map (snd . snd) $ curve
                ]
     getRarefactionCurve True = rarefactionSampleCurve fastBin start interval
@@ -82,7 +82,7 @@ printRarefactionCurve :: Bool
                       -> IO String
 printRarefactionCurve
     asDF sample fastBin runs start interval label window positionMap = do
-    body <- fmap unlines . mapM mapLine . M.toAscList $ positionMap
+    body <- fmap unlines . mapM mapLine . Map.toAscList $ positionMap
 
     return (header asDF ++ body)
   where
@@ -96,7 +96,7 @@ printRarefactionCurve
         return . intercalate "," $ [ label
                                    , show window
                                    , show p
-                                   , show . length $ xs
+                                   , show . Map.size $ xs
                                    , intercalate "/"
                                    . map (show . fst . snd)
                                    $ curve
@@ -111,9 +111,7 @@ printRarefactionCurve
                      -> intercalate "," [ label
                                         , show window
                                         , show p
-                                        , show
-                                        . length
-                                        $ xs
+                                        , show . Map.size $ xs
                                         , show x
                                         , show y
                                         , show z
