@@ -70,7 +70,8 @@ diversityOfMap order sample
     pow          = 1 / (1 - order)
     h            = negate
                  . Map.foldl' (+) 0
-                 . Map.map (\x -> p_i (fromIntegral x) * log (p_i (fromIntegral x)))
+                 . Map.map ( \x -> p_i (fromIntegral x)
+                           * log (p_i (fromIntegral x)))
     p_i x        = (fromIntegral x :: Double) /
                    (fromIntegral (Map.foldl' (+) 0 sample) :: Double)
 
@@ -101,7 +102,14 @@ rarefactionCurve !fastBin !runs !start !interval !xs =
         | n == n_total = return (fromIntegral n, (k, 0))
         | runs == 0    = return (fromIntegral n, (k - inner n, 0))
         | otherwise    = do
-            statTuple <- subsampleES runs (fromIntegral n_total) (fromIntegral n) . concatMap snd . Map.toAscList . Map.mapWithKey (\(s, f) x -> replicate x f) $ xs
+            statTuple <- subsampleES
+                         runs
+                         (fromIntegral n_total)
+                         (fromIntegral n)
+                       . concatMap snd
+                       . Map.toAscList
+                       . Map.mapWithKey (\(s, f) x -> replicate x f)
+                       $ xs
             return (fromIntegral n, statTuple)
     inner n = ( \x -> if fastBin
                         then x / choose (fromIntegral n_total) (fromIntegral n)
@@ -145,11 +153,12 @@ rarefactionSampleCurve !fastBin !start !interval !ls =
                 $ speciesList
     numHave s   = sum . map (\x -> if Set.member s x then 1 else 0)
     richness    = genericLength speciesList
-    speciesList = map snd . Map.keys $ ls
+    speciesList = Map.keys . Map.mapKeys (\(x, y) -> y) $ ls
     t_total     = genericLength samples
     samples     = getSampleContents ls
 
--- | Calculates the percent of the curve that is above 95% of height of the curve
+-- | Calculates the percent of the curve that is above 95% of height of the
+-- curve
 rarefactionViable :: [Double] -> Double
 rarefactionViable !xs = (genericLength valid / genericLength xs) * 100
   where

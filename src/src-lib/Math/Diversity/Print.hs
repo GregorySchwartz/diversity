@@ -61,7 +61,7 @@ printRarefaction
         return [ label
                , show window
                , show p
-               , show . Map.size $ xs
+               , show . Map.foldl' (+) 0 $ xs
                , show . rarefactionViable . map (snd . snd) $ curve
                ]
     getRarefactionCurve True = rarefactionSampleCurve fastBin start interval
@@ -96,7 +96,7 @@ printRarefactionCurve
         return . intercalate "," $ [ label
                                    , show window
                                    , show p
-                                   , show . Map.size $ xs
+                                   , show . Map.foldl' (+) 0 $ xs
                                    , intercalate "/"
                                    . map (show . fst . snd)
                                    $ curve
@@ -111,7 +111,7 @@ printRarefactionCurve
                      -> intercalate "," [ label
                                         , show window
                                         , show p
-                                        , show . Map.size $ xs
+                                        , show . Map.foldl' (+) 0 $ xs
                                         , show x
                                         , show y
                                         , show z

@@ -10,7 +10,7 @@ import Data.List
 
 -- Cabal
 import Options.Applicative
-import Data.Fasta.String.Parse
+import Data.Fasta.String
 
 -- Local
 import Math.Diversity.GenerateDiversity
@@ -156,8 +156,11 @@ generateDiversity opts = do
     contentsFile    <- if null . inputFasta $ opts
                         then getContents
                         else readFile . inputFasta $ opts
-    let lineIt       = unlines . (:) ">" . intersperse ">" . lines
-        contents     = if list opts then lineIt contentsFile else contentsFile
+    let contents     = if list opts
+                        then map ( \x -> FastaSequence { fastaHeader = ""
+                                                       , fastaSeq    = x } )
+                             . lines
+                        else parseFasta
         label        = inputLabel opts
         order        = inputOrder opts
         window       = inputWindow opts
@@ -166,24 +169,22 @@ generateDiversity opts = do
         start        = read . head . words . inputSubsampling $ opts
         interval     = read . last . words . inputSubsampling $ opts
 
-        fastaListN   = parseFasta contents
-        fastaList    = if nFlag then removeNs fastaListN else fastaListN
+        fastaList    = if nFlag then removeNs . contents else contents
         positionMap  = generatePositionMap
                        (sample opts)
                        (inputSampleField opts)
                        whole
                        window
-                       fastaList
+                     . fastaList
 
         howToOutput x = if std opts then putStrLn else writeFile x
-
-    print positionMap
 
     if (null . output $ opts)
         then return ()
         else howToOutput (output opts)
            . printDiversity label order window
-           $ positionMap
+           . positionMap
+           $ contentsFile
     if (null . outputRarefaction $ opts)
         then return ()
         else do
@@ -195,7 +196,8 @@ generateDiversity opts = do
                  interval
                  label
                  window
-                 positionMap
+               . positionMap
+               $ contentsFile
             howToOutput (outputRarefaction opts) s
     if (null . outputRarefactionCurve $ opts)
         then return ()
@@ -209,7 +211,8 @@ generateDiversity opts = do
                  interval
                  label
                  window
-                 positionMap
+               . positionMap
+               $ contentsFile
             howToOutput (outputRarefactionCurve opts) s
 
 main :: IO ()
