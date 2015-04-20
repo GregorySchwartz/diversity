@@ -5,14 +5,22 @@
 window length (to split into fragments) by position.
 -}
 
+{-# LANGUAGE BangPatterns #-}
+
 -- Built-in
 import Data.List
+import Control.Monad (forever)
+import qualified Data.Map.Strict as Map
+import qualified System.IO as IO
 
 -- Cabal
 import Options.Applicative
 import Data.Fasta.String
+import Pipes
+import qualified Pipes.Prelude as P
 
 -- Local
+import Math.Diversity.Types
 import Math.Diversity.GenerateDiversity
 import Math.Diversity.Print
 
@@ -25,7 +33,7 @@ data Options = Options { inputLabel             :: String
                        , inputSubsampling       :: String
                        , fastBin                :: Bool
                        , runs                   :: Int
-                       , removeN                :: Bool
+                       , removeNBool            :: Bool
                        , wholeSeq               :: Bool
                        , list                   :: Bool
                        , sample                 :: Bool
@@ -151,40 +159,69 @@ options = Options
          <> help "The csv file containing the diversities at each position.\
                  \ expects a string, so you need a string wven with std" )
 
+pipesFasta :: (MonadIO m) => IO.Handle -> Pipe String FastaSequence m ()
+pipesFasta h = do
+    first <- await
+    getRest first ""
+  where
+    getRest x !acc = do
+        eof <- liftIO $ IO.hIsEOF h
+        if eof
+            then yield FastaSequence { fastaHeader = tail x
+                                     , fastaSeq    = filter
+                                                     (`notElem` "\n\r ")
+                                                     acc }
+            else do
+                y <- await
+                if take 1 y == ">"
+                    then do
+                        yield FastaSequence { fastaHeader = tail x
+                                            , fastaSeq    = filter
+                                                            (`notElem` "\n\r ")
+                                                            acc }
+                        getRest y ""
+                    else getRest x (acc ++ y)
+
+pipesPositionMap :: Options -> IO PositionMap
+pipesPositionMap opts = do
+    h <- if null . inputFasta $ opts
+            then return IO.stdin
+            else IO.openFile (inputFasta opts) IO.ReadMode
+    runEffect
+          $ P.fold (Map.unionWith (Map.unionWith (+))) Map.empty id
+          $ P.fromHandle h
+        >-> toFastaSequence (list opts) h
+        >-> P.map ( generatePositionMap
+                    (sample opts)
+                    (inputSampleField opts)
+                    (wholeSeq opts)
+                    (inputWindow opts)
+                  . removals )
+  where
+    toFastaSequence True _ = P.map ( \x -> FastaSequence { fastaHeader = ""
+                                                        , fastaSeq = x } )
+    toFastaSequence False h = pipesFasta h
+    removals              = if removeNBool opts then removeN else id
+
 generateDiversity :: Options -> IO ()
 generateDiversity opts = do
-    contentsFile    <- if null . inputFasta $ opts
-                        then getContents
-                        else readFile . inputFasta $ opts
-    let contents     = if list opts
-                        then map ( \x -> FastaSequence { fastaHeader = ""
-                                                       , fastaSeq    = x } )
-                             . lines
-                        else parseFasta
+    let contents     = parseFasta
         label        = inputLabel opts
         order        = inputOrder opts
         window       = inputWindow opts
-        nFlag        = removeN opts
+        nFlag        = removeNBool opts
         whole        = wholeSeq opts
         start        = read . head . words . inputSubsampling $ opts
         interval     = read . last . words . inputSubsampling $ opts
-
-        fastaList    = if nFlag then removeNs . contents else contents
-        positionMap  = generatePositionMap
-                       (sample opts)
-                       (inputSampleField opts)
-                       whole
-                       window
-                     . fastaList
-
         howToOutput x = if std opts then putStrLn else writeFile x
+
+    positionMap <- pipesPositionMap opts
 
     if (null . output $ opts)
         then return ()
         else howToOutput (output opts)
            . printDiversity label order window
-           . positionMap
-           $ contentsFile
+           $ positionMap
     if (null . outputRarefaction $ opts)
         then return ()
         else do
@@ -196,8 +233,7 @@ generateDiversity opts = do
                  interval
                  label
                  window
-               . positionMap
-               $ contentsFile
+                 positionMap
             howToOutput (outputRarefaction opts) s
     if (null . outputRarefactionCurve $ opts)
         then return ()
@@ -211,8 +247,7 @@ generateDiversity opts = do
                  interval
                  label
                  window
-               . positionMap
-               $ contentsFile
+                 positionMap
             howToOutput (outputRarefactionCurve opts) s
 
 main :: IO ()

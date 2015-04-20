@@ -151,9 +151,9 @@ rarefactionSampleCurve !fastBin !start !interval !ls =
                               (numHave s samples)
                               (fromIntegral t) )
                 $ speciesList
-    numHave s   = sum . map (\x -> if Set.member s x then 1 else 0)
+    numHave s   = genericLength . filter (Set.member s)
     richness    = genericLength speciesList
-    speciesList = Map.keys . Map.mapKeys (\(x, y) -> y) $ ls
+    speciesList = Map.keys . Map.mapKeys snd $ ls
     t_total     = genericLength samples
     samples     = getSampleContents ls
 
