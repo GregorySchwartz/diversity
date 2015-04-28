@@ -159,29 +159,6 @@ options = Options
          <> help "The csv file containing the diversities at each position.\
                  \ expects a string, so you need a string wven with std" )
 
-pipesFasta :: (MonadIO m) => IO.Handle -> Pipe String FastaSequence m ()
-pipesFasta h = do
-    first <- await
-    getRest first ""
-  where
-    getRest x !acc = do
-        eof <- liftIO $ IO.hIsEOF h
-        if eof
-            then yield FastaSequence { fastaHeader = tail x
-                                     , fastaSeq    = filter
-                                                     (`notElem` "\n\r ")
-                                                     acc }
-            else do
-                y <- await
-                if take 1 y == ">"
-                    then do
-                        yield FastaSequence { fastaHeader = tail x
-                                            , fastaSeq    = filter
-                                                            (`notElem` "\n\r ")
-                                                            acc }
-                        getRest y ""
-                    else getRest x (acc ++ y)
-
 pipesPositionMap :: Options -> IO PositionMap
 pipesPositionMap opts = do
     h <- if null . inputFasta $ opts
