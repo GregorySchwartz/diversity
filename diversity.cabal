@@ -20,7 +20,7 @@ library
   hs-source-dirs:      src/src-lib
   exposed-modules:     Math.Diversity.Types, Math.Diversity.Diversity, Math.Diversity.GenerateDiversity, Math.Diversity.Print, Math.Diversity.Statistics, Math.Diversity.RandomSampling
   -- other-modules:
-  build-depends:       base >=4.6 && <4.9, containers >=0.5 && <0.6, split >=0.2 && <0.3, parsec >=3.1 && <4.0, fasta >=0.5.3 && <0.6, math-functions >=0.1 && <0.2, scientific >= 0.3 && < 0.4, random-shuffle >=0.0 && < 0.1, MonadRandom >=0.3 && <0.4
+  build-depends:       base >=4.6 && <4.9, containers >=0.5 && <0.6, split >=0.2 && <0.3, parsec >=3.1 && <4.0, fasta >=0.5.4 && <0.6, math-functions >=0.1 && <0.2, scientific >= 0.3 && < 0.4, random-shuffle >=0.0 && < 0.1, MonadRandom >=0.3 && <0.4
 
 executable diversity
   ghc-options: -O2
@@ -28,4 +28,4 @@ executable diversity
   hs-source-dirs:      src/src-exec
   main-is:             Main.hs
   -- other-modules:       
-  build-depends:       diversity, base >=4.6 && <4.9, optparse-applicative >=0.10 && <0.12, fasta >=0.5.3 && <0.6, pipes >= 4.1 && < 4.2, containers >=0.5 && <0.6
+  build-depends:       diversity, base >=4.6 && <4.9, optparse-applicative >=0.10 && <0.12, fasta >=0.5.4 && <0.6, pipes >= 4.1 && < 4.2, containers >=0.5 && <0.6
