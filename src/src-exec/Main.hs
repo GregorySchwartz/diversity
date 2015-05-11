@@ -5,11 +5,9 @@
 window length (to split into fragments) by position.
 -}
 
-{-# LANGUAGE BangPatterns #-}
-
 -- Built-in
 import Data.List
-import Control.Monad (forever)
+import Control.Monad (forever, unless)
 import qualified Data.Map.Strict as Map
 import qualified System.IO as IO
 
@@ -31,6 +29,7 @@ data Options = Options { inputLabel             :: String
                        , inputFasta             :: String
                        , inputSampleField       :: Int
                        , inputSubsampling       :: String
+                       , inputG                 :: Double
                        , fastBin                :: Bool
                        , runs                   :: Int
                        , removeNBool            :: Bool
@@ -82,13 +81,25 @@ options = Options
       <*> strOption
           ( long "input-subsampling"
          <> short 'I'
-         <> metavar "INT INT"
+         <> metavar "INT INT (INT)"
          <> value "1 1"
-         <> help "The start point and interval of subsamples in the\
-                 \ rarefaction curve. For instance, '1 1' would be 1, 2, 3, ...\
-                 \ '2 6' would be 2, 8, 14, ... Note: input is a string so\
-                 \ use quotations around the entry and it always has the\
-                 \ number of subsamples overall as the last point" )
+         <> help "The start point, interval, and optional endpoint of\
+                 \ subsamples in the rarefaction curve.\
+                 \ For instance, '1 1 4' would be 1, 2, 3, 4\
+                 \ '2 6 14' would be 2, 8, 14, ... Note: input is a string so\
+                 \ use quotations around the entry and it always includes the\
+                 \ number of subsamples overall in the result. Excluding the\
+                 \ endpoint results in the number of samples the endpoint, so\
+                 \ '1 1' would be 1, 2, 3, ..., N " )
+      <*> option auto
+          ( long "input-g"
+         <> short 'g'
+         <> metavar "Double"
+         <> value 0.95
+         <> help "Used for calculating the number of individuals\
+                 \ (or samples) needed before the proportion g of the total\
+                 \ number of estimated species is reached.\
+                 \ Sobs / Sest < g < 1" )
       <*> switch
           ( long "fast-bin"
          <> short 'f'
@@ -159,6 +170,12 @@ options = Options
          <> help "The csv file containing the diversities at each position.\
                  \ expects a string, so you need a string wven with std" )
 
+parseSampling :: (Num a, Read a) => String -> [a]
+parseSampling = map read . parsing . words
+  where
+    parsing [x, y] = [x, y, "0"]
+    parsing x      = x
+
 pipesPositionMap :: Options -> IO PositionMap
 pipesPositionMap opts = do
     h <- if null . inputFasta $ opts
@@ -188,33 +205,31 @@ generateDiversity opts = do
         window       = inputWindow opts
         nFlag        = removeNBool opts
         whole        = wholeSeq opts
-        start        = read . head . words . inputSubsampling $ opts
-        interval     = read . last . words . inputSubsampling $ opts
+        [start, interval, end] = parseSampling . inputSubsampling $ opts
         howToOutput x = if std opts then putStrLn else writeFile x
 
     positionMap <- pipesPositionMap opts
 
-    if (null . output $ opts)
-        then return ()
-        else howToOutput (output opts)
-           . printDiversity label order window
-           $ positionMap
-    if (null . outputRarefaction $ opts)
-        then return ()
-        else do
+    unless (null . output $ opts)
+         $ howToOutput (output opts)
+         . printDiversity label order window
+         $ positionMap
+    unless (null . outputRarefaction $ opts)
+         $ do
             s <- printRarefaction
                  (sample opts)
                  (fastBin opts)
                  (runs opts)
                  start
                  interval
+                 end
+                 (inputG opts)
                  label
                  window
                  positionMap
             howToOutput (outputRarefaction opts) s
-    if (null . outputRarefactionCurve $ opts)
-        then return ()
-        else do
+    unless (null . outputRarefactionCurve $ opts)
+         $ do
             s <- printRarefactionCurve
                  (rarefactionDF opts)
                  (sample opts)
@@ -222,6 +237,7 @@ generateDiversity opts = do
                  (runs opts)
                  start
                  interval
+                 end
                  label
                  window
                  positionMap
