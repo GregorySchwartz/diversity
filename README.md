@@ -128,18 +128,21 @@ accuracy. In addition, **`-f` cannot work on large data sets (they will show up
 as NaN). In this case, you must use the slower, but more accurate default
 method.** The output for the curve is similar to the diversity output, with
 label, window, position, and weight columns. However, there are three additional
-columns: subsample, expected_richness, and mad. The rarefaction curve tells us if we have
-sufficiently sampled enough if the curve plateaus. To check if the curve levels
-off, we can plot the subsample column as the x axis and the expected_richness
-column as the y axis. The mad column is only for empirical richness, described
-below. The other file contains a percent_above column, which
+columns: subsample, expected_richness, and mad. The rarefaction curve tells us
+if we have sufficiently sampled enough if the curve plateaus. To check if the
+curve levels off, we can plot the subsample column as the x axis and the
+expected_richness column as the y axis. The mad column is only for empirical
+richness, described below. The other file contains a percent_above column, which
 tells us the percent of subsamples that are above 95% of the height of the
 curve. This can give us a quick glance at the curve to know if the curve
 "plateaus" (unless there are NaNs, which result in a nonsense percentage). You
 must be careful when looking at this percentage, however, as it might be high
 due to a very low number of sequences, say 2 or 3, as it's a percent of those
 low values so it might be artificially high in those cases, but you can tell by
-the weight.
+the weight. There is also an additional sampling column, which says how many
+more samples are needed to get the proportion g of the estimated richness in the
+assemblege. That estimated number is included under the S_est column, where the
+observed richness is in the richness column.
 
 For very large samples, the theoretical calculation of rarefaction will take
 approximately an eternity to execute with a high probability of memory issues.
