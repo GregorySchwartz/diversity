@@ -229,7 +229,9 @@ rarefactionViable !xs = (genericLength valid / genericLength xs) * 100
 -- | Returns the number of individuals needed to get the proportion g of
 -- the estimated total richness of the assemblage. Sobs / Sest < g < 1
 individualG :: Double -> Map.Map (Sample, Fragment) Int -> Double
-individualG g sample = ((sobs * f1) / (2 * f2)) * log (f0 / ((1 - g) * sest))
+individualG g sample
+    | sobs / sest >= g = 0
+    | otherwise = ((sobs * f1) / (2 * f2)) * log (f0 / ((1 - g) * sest))
   where
     sest = sobs + f0
     sobs = fromIntegral $ richness sample
@@ -240,8 +242,10 @@ individualG g sample = ((sobs * f1) / (2 * f2)) * log (f0 / ((1 - g) * sest))
 -- | Returns the number of samples needed to get the proportion g of
 -- the estimated total richness of the assemblage. Sobs / Sest < g < 1
 sampleG :: Double -> Map.Map (Sample, Fragment) Int -> Double
-sampleG g sample = log (1 - ((t / (t - 1)) * ((2 * q2) / (q1 ** 2)) * ((g * sest) - sobs)))
-                 / log (1 - ((2 * q2) / (((t - 1) * q1) + (2 * q2))))
+sampleG g sample
+    | sobs / sest >= g = 0
+    | otherwise = log (1 - ((t / (t - 1)) * ((2 * q2) / (q1 ** 2)) * ((g * sest) - sobs)))
+                / log (1 - ((2 * q2) / (((t - 1) * q1) + (2 * q2))))
   where
     t    = fromIntegral . Map.size . Map.mapKeys fst $ sample
     sest = sobs + q0
