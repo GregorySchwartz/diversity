@@ -84,7 +84,7 @@ gaps are artificial and so we skip over them and we don't start on a gap. We can
 achieve this by setting the window length to 2:
 
 ```
-diversity -i input.fasta -o output.csv -w 2 -o 1
+diversity -i input.fasta -o output.csv -w 2 -r 1
 ```
 
 The output is similar, but now there are only positions 1 and 2 as we cannot
