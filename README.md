@@ -9,19 +9,12 @@ must be aligned.
 
 Depends on "fasta": https://github.com/GregorySchwartz/fasta.git 
 
-## Citations
+## Citation
 
-**For an overview of diversity**
-
-[Entropy and diversity](http://onlinelibrary.wiley.com/doi/10.1111/j.2006.0030-1299.14714.x/abstract)
-
-**For a positional and sliding window use case that uses this program**
+**Please cite this paper if you are using this program**
 
 [Conserved variation: identifying patterns of stability and variability in BCR
-and TCR V genes with different diversity and richness metrics](http://www.ncbi.nlm.nih.gov/pubmed/23735612) (cite this paper if using this program)
-
-[Germline Amino Acid Diversity in B Cell Receptors is a Good Predictor of
-Somatic Selection Pressures](http://www.ncbi.nlm.nih.gov/pubmed/24265630)
+and TCR V genes with different diversity and richness metrics](http://www.ncbi.nlm.nih.gov/pubmed/23735612)
 
 ## Installation
 
@@ -154,6 +147,20 @@ values as well as the median absolute deviation for variation in the runs. **You
 must use this method (in individual based rarefaction only, triggered
 automatically when the number of random runs, -R, is specified) or else you will
 run into issues with large data sets.**
+
+## Further Reading
+
+**For an overview of diversity**
+
+[Entropy and diversity](http://onlinelibrary.wiley.com/doi/10.1111/j.2006.0030-1299.14714.x/abstract)
+
+**For a positional and sliding window use case that uses this program**
+
+[Conserved variation: identifying patterns of stability and variability in BCR
+and TCR V genes with different diversity and richness metrics](http://www.ncbi.nlm.nih.gov/pubmed/23735612)
+
+[Germline Amino Acid Diversity in B Cell Receptors is a Good Predictor of
+Somatic Selection Pressures](http://www.ncbi.nlm.nih.gov/pubmed/24265630)
 
 ## Usage
 
