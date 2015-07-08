@@ -23,9 +23,14 @@ import qualified Data.List.Split as Split
 -- Local
 import Math.Diversity.Types
 
--- | Get the sample ID of a sequence
-getSample :: Int -> FastaSequence -> Sample
-getSample x = (!! (x - 1)) . Split.splitOn "|" . fastaHeader
+-- | Get the field of a fasta sequence header
+getField :: Int -> FastaSequence -> String
+getField x = (!! (x - 1)) . Split.splitOn "|" . fastaHeader
+
+-- | Get the count field of a fasta sequence header
+getCount :: Int -> FastaSequence -> Int
+getCount 0 = const 1
+getCount x = read . getField x
 
 -- | Generates fragment list from string of "win" length. This version
 -- differs from normal as it takes a tuple with the position as the first
@@ -46,19 +51,23 @@ fragmentPos whole win ls = fragmentPosLoop ls []
 -- | Generate the frequency from a FastaSequence
 generatePositionMap :: Bool
                     -> Int
+                    -> Int
                     -> Bool
                     -> Window
                     -> FastaSequence
                     -> PositionMap
-generatePositionMap !sample !sampleField !whole !win = posSeqList
+generatePositionMap !sample !sampleField !countField !whole !win = posSeqList
   where
     posSeqList !x       = Map.fromList
-                        . map (\(!p, !f) -> (p, Map.singleton (sampleIt sample x f) 1))
+                        . map ( \(!p, !f) -> ( p
+                                             , Map.singleton (sampleIt sample x f)
+                                             . getCount countField
+                                             $ x ) )
                         . fragmentPos whole win
                         . filter (noGaps . snd)
                         . zip [1..]
                         . fastaSeq
                         $ x
     noGaps y            = y /= '-' && y /= '.'
-    sampleIt True !s !f = (getSample sampleField s, f)
+    sampleIt True !s !f = (getField sampleField s, f)
     sampleIt False _ !f = ("Sample", f)

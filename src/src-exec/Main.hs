@@ -28,6 +28,7 @@ data Options = Options { inputLabel             :: String
                        , inputWindow            :: Int
                        , inputFasta             :: String
                        , inputSampleField       :: Int
+                       , inputCountField        :: Int
                        , inputSubsampling       :: String
                        , inputG                 :: Double
                        , fastBin                :: Bool
@@ -78,6 +79,17 @@ options = Options
          <> value 1
          <> help "The index for the sample ID in the header separated by '|'\
                  \ (1 indexed)" )
+      <*> option auto
+          ( long "input-count-field"
+         <> short 'C'
+         <> metavar "INT"
+         <> value 0
+         <> help "The index for the number of this type in the header separated\
+                 \ by '|' (1 indexed). Used if there are multiple copies\
+                 \ of one entry, so a '4' in the header would indicate that\
+                 \ this entity occurred 4 times. Defaults to 0, meaning that\
+                 \ this field is ignored and count each sequence as occurring\
+                 \ just once" )
       <*> strOption
           ( long "input-subsampling"
          <> short 'I'
@@ -188,6 +200,7 @@ pipesPositionMap opts = do
         >-> P.map ( generatePositionMap
                     (sample opts)
                     (inputSampleField opts)
+                    (inputCountField opts)
                     (wholeSeq opts)
                     (inputWindow opts)
                   . removals )
