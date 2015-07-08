@@ -168,7 +168,7 @@ options = Options
          <> metavar "FILE"
          <> value ""
          <> help "The csv file containing the diversities at each position.\
-                 \ expects a string, so you need a string wven with std" )
+                 \ expects a string, so you need a string even with std" )
 
 parseSampling :: (Num a, Read a) => String -> [a]
 parseSampling = map read . parsing . words

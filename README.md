@@ -221,6 +221,6 @@ Available options:
                            Expects a a string, so you need a string even with
                            std
   -o,--output FILE         The csv file containing the diversities at each
-                           position. expects a string, so you need a string wven
+                           position. expects a string, so you need a string even
                            with std
 ```
