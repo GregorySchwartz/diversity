@@ -2,7 +2,7 @@
 -- documentation, see http://haskell.org/cabal/users-guide/
 
 name:                diversity
-version:             0.7.0.3
+version:             0.7.1.0
 synopsis:            Return the diversity at each position by default for all sequences in a fasta file
 description:         Find the diversity of a collection of entities, mainly for use with fasta sequences.
 homepage:            https://github.com/GregorySchwartz/diversity

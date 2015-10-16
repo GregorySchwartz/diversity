@@ -33,6 +33,7 @@ data Options = Options { inputLabel             :: String
                        , inputG                 :: Double
                        , fastBin                :: Bool
                        , runs                   :: Int
+                       , gapsFlag               :: Bool
                        , removeNBool            :: Bool
                        , wholeSeq               :: Bool
                        , list                   :: Bool
@@ -131,6 +132,13 @@ options = Options
                  \ rarefaction is automatically enabled (individual based only,\
                  \ not for sample based)" )
       <*> switch
+          ( long "keep-gaps"
+         <> short 'G'
+         <> help "Do not remove '.' and '-' characters from the analysis. This\
+                 \ flag will thus treat these characters as additional entities\
+                 \ rather than be ignored as artificial biological gaps in\
+                 \ a sequence" )
+      <*> switch
           ( long "remove-N"
          <> short 'n'
          <> help "Remove 'N' and 'n' characters" )
@@ -198,6 +206,7 @@ pipesPositionMap opts = do
           $ P.fromHandle h
         >-> toFastaSequence (list opts) h
         >-> P.map ( generatePositionMap
+                    (gapsFlag opts)
                     (sample opts)
                     (inputSampleField opts)
                     (inputCountField opts)

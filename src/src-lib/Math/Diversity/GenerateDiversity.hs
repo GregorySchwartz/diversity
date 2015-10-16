@@ -15,7 +15,6 @@ import qualified Data.Map.Strict as Map
 import Data.List
 import Data.Fasta.String
 import qualified Data.Sequence as Seq
-import Debug.Trace
 
 -- Cabal
 import qualified Data.List.Split as Split
@@ -50,13 +49,15 @@ fragmentPos whole win ls = fragmentPosLoop ls []
 
 -- | Generate the frequency from a FastaSequence
 generatePositionMap :: Bool
+                    -> Bool
                     -> Int
                     -> Int
                     -> Bool
                     -> Window
                     -> FastaSequence
                     -> PositionMap
-generatePositionMap !sample !sampleField !countField !whole !win = posSeqList
+generatePositionMap !gapsFlag !sample !sampleField !countField !whole !win =
+    posSeqList
   where
     posSeqList !x       = Map.fromList
                         . map ( \(!p, !f) -> ( p
@@ -68,6 +69,6 @@ generatePositionMap !sample !sampleField !countField !whole !win = posSeqList
                         . zip [1..]
                         . fastaSeq
                         $ x
-    noGaps y            = y /= '-' && y /= '.'
+    noGaps y            = (y /= '-' && y /= '.') || gapsFlag
     sampleIt True !s !f = (getField sampleField s, f)
     sampleIt False _ !f = ("Sample", f)
