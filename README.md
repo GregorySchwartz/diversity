@@ -18,23 +18,13 @@ and TCR V genes with different diversity and richness metrics](http://www.ncbi.n
 
 ## Installation
 
-We should always be using sandboxes with cabal, so let's make a directory for
-the binary and create a sandbox:
+Thanks to stack installation is a lot easier:
 
 ```
-mkdir diversity
-cd diversity
-cabal sandbox init
+stack install diversity --resolver nightly
 ```
 
-Now we can easily update cabal and install the package!
-
-```
-cabal update
-cabal install diversity
-```
-
-The binary will be found at ./.cabal-sandbox/bin/diversity
+The binary should now be in your path (local bin).
 
 ## Quick Tutorial
 
