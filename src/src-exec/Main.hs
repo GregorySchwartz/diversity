@@ -240,11 +240,6 @@ generateDiversity opts = do
          $ do
             s <- printRarefaction
                  (sample opts)
-                 (fastBin opts)
-                 (runs opts)
-                 start
-                 interval
-                 end
                  (inputG opts)
                  label
                  window
