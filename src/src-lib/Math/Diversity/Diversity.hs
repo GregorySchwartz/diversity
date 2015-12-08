@@ -12,6 +12,8 @@ module Math.Diversity.Diversity ( hamming
                                 , diversityOfMap
                                 , chao1
                                 , chao2
+                                , chao1Var
+                                , chao2Var
                                 , rarefactionCurve
                                 , rarefactionSampleCurve
                                 , rarefactionViable
@@ -94,7 +96,9 @@ overlapSampleMap = Map.mapKeysWith (+) snd . Map.map (const 1)
 abundanceFreq :: (Ord a) => Int -> Map.Map a Int -> Int
 abundanceFreq x = Map.size . Map.filter (== x)
 
--- | Returns the number of b that appear in x number of a
+-- | Returns the number of b that appear in x number of a. Notice that this
+-- function takes in a normal frequency map, as it converts it with
+-- overlapSampleMap.
 overlapFreq :: (Ord a, Ord b) => Int -> Map.Map (a, b) Int -> Int
 overlapFreq x = Map.size . Map.filter (== x) . overlapSampleMap
 
@@ -122,6 +126,44 @@ chao2 samples
     q2  = fromIntegral . overlapFreq 2 $ samples
     -- Saves time so don't have to recalculate
     t   = fromIntegral . Map.size . Map.mapKeys fst $ samples
+
+-- | Returns the chao1 estimator variance of a map of the species
+-- and how many times each one appears.
+chao1Var :: (Ord a) => Map.Map a Int -> Double
+chao1Var sample
+    | f2 > 0    = f2
+                * ( ((1 / 2) * ((n - 1) / n) * ((f1 / f2) ** 2))
+                  + ((((n - 1) / n) ** 2) * ((f1 / f2) ** 3))
+                  + ((1 / 4) * (((n - 1) / n) ** 2) * ((f1 / f2) ** 4))
+                  )
+    | otherwise = (((n - 1) / n) * ((f1 * (f1 - 1)) / 2))
+                + ((((n - 1) / n) ** 2) * ((f1 * (((2 * f1) - 1) ** 2)) / 4))
+                + ((((n - 1) / n) ** 2) * ((f1 ** 4) / (4 * sest)))
+  where
+    sest = fromIntegral (Map.size sample) + chao1 sample
+    f1  = fromIntegral . abundanceFreq 1 $ sample
+    f2  = fromIntegral . abundanceFreq 2 $ sample
+    -- Saves time so don't have to recalculate
+    n    = fromIntegral . Map.foldl' (+) 0 $ sample
+
+-- | Returns the chao2 estimator variance of a map of the sample labeled species
+-- (sample, species) and how many times it appears.
+chao2Var :: (Ord a, Ord b) => Map.Map (a, b) Int -> Double
+chao2Var samples
+    | q2 > 0    = q2
+                * ( ((1 / 2) * ((t - 1) / t) * ((q1 / q2) ** 2))
+                  + ((((t - 1) / t) ** 2) * ((q1 / q2) ** 3))
+                  + ((1 / 4) * ((t - 1 / t) ** 2) * ((q1 / q2) ** 4))
+                  )
+    | otherwise = (((t - 1) / t) * ((q1 * (q1 - 1)) / 2))
+                + ((((t - 1) / t) ** 2) * ((q1 * (((2 * q1) - 1) ** 2)) / 4))
+                + ((((t - 1) / t) ** 2) * ((q1 ** 4) / (4 * sest)))
+  where
+    sest = fromIntegral (richness samples) + chao2 samples
+    q1   = fromIntegral . overlapFreq 1 $ samples
+    q2   = fromIntegral . overlapFreq 2 $ samples
+    -- Saves time so don't have to recalculate
+    t    = fromIntegral . Map.size . Map.mapKeys fst $ samples
 
 -- | Binomial for small or large numbers (slow but works for big numbers,
 -- fast but works for small numbers)

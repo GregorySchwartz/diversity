@@ -52,7 +52,8 @@ printRarefaction
     return (header ++ body)
   where
     header           = "label,window,position,weight,\
-                       \additional_sampling,g_proportion,richness,S_est\n"
+                       \additional_sampling,g_proportion,richness,\
+                       \S_est,S_est_var\n"
     mapLine (p, xs)  = fmap (intercalate ",") . line p $ xs
     line p xs        = do
         -- The minimum number of samples needed before any additional
@@ -65,9 +66,12 @@ printRarefaction
                , show g
                , show . sobs $ xs
                , show . sest bySample $ xs
+               , show . var bySample $ xs
                ]
     sest True xs  = sobs xs + chao2 xs
     sest False xs = sobs xs + chao1 xs
+    var True      = chao2Var
+    var False     = chao1Var
     sobs = fromIntegral . richness
     additionalSampling True  = sampleG g
     additionalSampling False = individualG g
