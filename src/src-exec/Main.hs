@@ -265,5 +265,4 @@ main = execParser opts >>= generateDiversity
   where
     opts = info (helper <*> options)
       ( fullDesc
-     <> progDesc "Return the diversity at each position for all sequences in a\
-                 \ fasta file" )
+     <> progDesc "Quantify the diversity of a population" )
