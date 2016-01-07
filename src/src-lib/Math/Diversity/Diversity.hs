@@ -183,18 +183,18 @@ rarefactionCurve :: Bool
                  -> Integer
                  -> Integer
                  -> Map.Map (Sample, Fragment) Int
-                 -> IO [(Int, (Double, Double))]
+                 -> IO [(Int, Maybe (Double, Double))]
 rarefactionCurve !fastBin !runs !start !interval !end !sample =
         mapM rarefact
       . LO.nubSort
       $ n_total : [start,(start + interval)..finish]
   where
     rarefact !n
-        | n == 0       = return (fromIntegral n, (0, 0))
-        | n == 1       = return (fromIntegral n, (1, 0))
-        | n == n_total = return (fromIntegral n, (k, 0))
-        | n > n_total  = return (fromIntegral n, (estimation n, 0))
-        | runs == 0    = return (fromIntegral n, (k - inner n, 0))
+        | n == 0       = return (fromIntegral n, Just (0, 0))
+        | n == 1       = return (fromIntegral n, Just (1, 0))
+        | n == n_total = return (fromIntegral n, Just (k, 0))
+        | n > n_total  = return (fromIntegral n, Just (estimation n, 0))
+        | runs == 0    = return (fromIntegral n, Just (k - inner n, 0))
         | otherwise    = do  -- Empirical version
             statTuple <- subsampleES
                          runs
@@ -231,17 +231,17 @@ rarefactionSampleCurve :: Bool
                        -> Int
                        -> Int
                        -> Map.Map (Sample, Fragment) Int
-                       -> IO [(Int, (Double, Double))]
+                       -> IO [(Int, Maybe (Double, Double))]
 rarefactionSampleCurve !fastBin !start !interval !end !ls =
     mapM rarefact
   . LO.nubSort
   $ t_total : [start,(start + interval)..finish]
   where
     rarefact !t
-        | t == 0       = return (t, (0, 0))
-        | t == t_total = return (t, (sobs, 0))
-        | t > t_total  = return (t, (estimation t, 0))
-        | otherwise    = return (t, (sobs - inner t, 0))
+        | t == 0       = return (t, Just (0, 0))
+        | t == t_total = return (t, Just (sobs, 0))
+        | t > t_total  = return (t, Just (estimation t, 0))
+        | otherwise    = return (t, Just (sobs - inner t, 0))
     inner t      = ( \x -> if fastBin
                              then x / choose t_total t
                              else x )
@@ -307,12 +307,14 @@ minRarefaction :: Bool
                -> IO Int
 minRarefaction _ _ (-1) _ _ _ = return (-1)
 minRarefaction bySample fastBin threshold sample !oldRare !count = do
-    newRare <- fmap (fst . snd . head)
+    newRare <- fmap (maybe (-1) fst . snd . head)
              . rarefaction bySample count
              $ sample
-    if newRare - oldRare < fromIntegral threshold
-        then return count
-        else minRarefaction True fastBin threshold sample newRare (count + 1)
+    if newRare == (-1)
+        then return (-1)
+        else if newRare - oldRare < fromIntegral threshold
+            then return count
+            else minRarefaction True fastBin threshold sample newRare (count + 1)
   where
     rarefaction True x  = rarefactionSampleCurve fastBin x 1 x
     rarefaction False x = rarefactionCurve

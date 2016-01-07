@@ -13,6 +13,7 @@ module Math.Diversity.Print ( printDiversity
 
 -- Built in
 import Data.List
+import Data.Maybe
 import qualified Data.Map.Strict as Map
 
 -- Local
@@ -108,30 +109,30 @@ printRarefactionCurve
                                    , show . Map.foldl' (+) 0 $ xs
                                    , show
                                    . rarefactionViable
-                                   . map (snd . snd)
+                                   . map (maybe (-1) snd . snd)
                                    $ curve
                                    , intercalate "/"
-                                   . map (show . fst . snd)
+                                   . map (maybe "NA" (show . fst) . snd)
                                    $ curve
                                    , intercalate "/"
-                                   . map (show . snd . snd)
+                                   . map (maybe "NA" (show . snd) . snd)
                                    $ curve
                                    ]
     line True p xs    = do
         curve <- getRarefactionCurve bySample xs
         return . intercalate "\n"
-               . map ( \(!x, (!y, !z))
+               . map ( \(!x, !y)
                      -> intercalate "," [ label
                                         , show window
                                         , show p
                                         , show . Map.foldl' (+) 0 $ xs
                                         , show
                                         . rarefactionViable
-                                        . map (snd . snd)
+                                        . map (maybe (-1) snd . snd)
                                         $ curve
                                         , show x
-                                        , show y
-                                        , show z
+                                        , maybe "NA" (show . fst) y
+                                        , maybe "NA" (show . snd) y
                                         ] )
                $ curve
     getRarefactionCurve True = rarefactionSampleCurve fastBin start interval end

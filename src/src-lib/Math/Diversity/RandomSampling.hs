@@ -34,7 +34,12 @@ subsampleSpecies size n gen = Set.size . Set.fromList . subsample size n gen
 
 -- | Repeat the sampling to get a median and MAD value for the runs for the
 -- expected species counts
-subsampleES :: (Eq a, Ord a) => Int -> Int -> Int -> [a] -> IO (Double, Double)
+subsampleES :: (Eq a, Ord a)
+            => Int
+            -> Int
+            -> Int
+            -> [a]
+            -> IO (Maybe (Double, Double))
 subsampleES runs size n xs = do
     allRuns <- mapM (const run) [1..runs]
 
