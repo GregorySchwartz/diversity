@@ -6,7 +6,7 @@ version:             0.7.2.1
 synopsis:            Quantify the diversity of a population
 description:         Find the diversity of a collection of entities, mainly for use with fasta sequences.
 homepage:            https://github.com/GregorySchwartz/diversity
-license:             GPL-2
+license:             GPL-3
 license-file:        LICENSE
 author:              Gregory W. Schwartz
 maintainer:          gregory.schwartz@drexel.edu
