@@ -22,14 +22,10 @@ import qualified Data.List.Split as Split
 -- Local
 import Math.Diversity.Types
 
--- | Get the field of a fasta sequence header
-getField :: Int -> FastaSequence -> String
-getField x = (!! (x - 1)) . Split.splitOn "|" . fastaHeader
-
 -- | Get the count field of a fasta sequence header
 getCount :: Int -> FastaSequence -> Int
 getCount 0 = const 1
-getCount x = read . getField x
+getCount x = read . getField x '|'
 
 -- | Generates fragment list from string of "win" length. This version
 -- differs from normal as it takes a tuple with the position as the first
@@ -70,5 +66,5 @@ generatePositionMap !gapsFlag !sample !sampleField !countField !whole !win =
                         . fastaSeq
                         $ x
     noGaps y            = (y /= '-' && y /= '.') || gapsFlag
-    sampleIt True !s !f = (getField sampleField s, f)
+    sampleIt True !s !f = (getField sampleField '|' s, f)
     sampleIt False _ !f = ("Sample", f)
