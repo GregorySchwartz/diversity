@@ -12,10 +12,11 @@ import qualified Data.Map.Strict as Map
 import qualified System.IO as IO
 
 -- Cabal
-import Options.Applicative
+import Data.Semigroup ((<>))
 import Data.Fasta.String
 import Pipes
 import qualified Pipes.Prelude as P
+import Options.Applicative
 
 -- Local
 import Math.Diversity.Types

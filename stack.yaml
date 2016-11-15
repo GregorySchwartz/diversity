@@ -3,4 +3,4 @@ packages:
 - '.'
 - '/home/gw/code/utility/fasta'
 extra-deps: []
-resolver: nightly-2016-07-07
+resolver: nightly-2016-11-13

@@ -2,7 +2,7 @@
 -- documentation, see http://haskell.org/cabal/users-guide/
 
 name:                diversity
-version:             0.8.0.1
+version:             0.8.0.2
 synopsis:            Quantify the diversity of a population
 description:         Find the diversity of a collection of entities, mainly for use with fasta sequences.
 homepage:            https://github.com/GregorySchwartz/diversity
@@ -48,3 +48,4 @@ executable diversity
                      , fasta >=0.8
                      , pipes >= 4.1
                      , containers >=0.5
+                     , semigroups
