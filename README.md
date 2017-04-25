@@ -124,7 +124,7 @@ might be high due to a very low number of sequences, say 2 or 3, as it's a
 percent of those low values so it might be artificially high in those cases, but
 you can tell by the weight. There is also an additional sampling column, which
 says how many more samples are needed to get the proportion g of the estimated
-richness in the assemblege. That estimated number is included under the S_est
+richness in the assemblage. That estimated number is included under the S_est
 column, where the observed richness is in the richness column. If the additional
 sampling has a value of NaN, the number of entities in two samples is probably 0
 so the value cannot be calculated.
