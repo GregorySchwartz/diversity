@@ -1,6 +1,5 @@
 flags: {}
 packages:
 - '.'
-- '/home/gw/code/utility/fasta'
 extra-deps: []
-resolver: nightly-2016-11-13
+resolver: lts-8.0
