@@ -21,7 +21,7 @@ and TCR V genes with different diversity and richness metrics](http://www.ncbi.n
 Thanks to stack installation is a lot easier:
 
 ```
-stack install diversity --resolver nightly
+stack install diversity
 ```
 
 The binary should now be in your path (local bin).
