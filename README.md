@@ -3,9 +3,7 @@ Diversity
 
 Gregory W. Schwartz
 
-This program will take a fasta file and find the diversity and rarefaction value
-(percent of the rarefaction curve that is above 95% of the curve). The sequences
-must be aligned.
+This program will take a fasta file and find the diversity and rarefaction curve. The sequences must be aligned.
 
 Depends on "fasta": https://github.com/GregorySchwartz/fasta.git 
 
@@ -156,16 +154,15 @@ Somatic Selection Pressures](http://www.ncbi.nlm.nih.gov/pubmed/24265630)
 ## Usage
 
 ```
-Diversity, Gregory W. Schwartz
-
 Usage: diversity [-l|--input-label LABEL] [-r|--input-order [1]|INT]
                  [-w|--input-window [1]|INT] [-i|--input-fasta FILE]
-                 [-S|--input-sample-field INT] [-I|--input-subsampling INT INT]
-                 [-f|--fast-bin] [-n|--remove-N] [-a|--whole-sequence]
-                 [-L|--list] [-s|--sample] [-d|--rarefaction-df] [-t|--std]
-                 [-O|--output-rarefaction FILE]
+                 [-S|--input-sample-field INT] [-C|--input-count-field INT]
+                 [-I|--input-subsampling INT INT (INT)] [-g|--input-g Double]
+                 [-f|--fast-bin] [-R|--input-runs INT] [-G|--keep-gaps]
+                 [-n|--remove-N] [-a|--whole-sequence] [-L|--list] [-s|--sample]
+                 [-d|--rarefaction-df] [-t|--std] [-O|--output-rarefaction FILE]
                  [-c|--output-rarefaction-curve FILE] [-o|--output FILE]
-  Return the diversity at each position for all sequences in a fasta file
+  Quantify the diversity of a population
 
 Available options:
   -h,--help                Show this help text
@@ -179,18 +176,42 @@ Available options:
   -S,--input-sample-field INT
                            The index for the sample ID in the header separated
                            by '|' (1 indexed)
-  -I,--input-subsampling INT INT
-                           The start point and interval of subsamples in the
-                           rarefaction curve. For instance, '1 1' would be 1, 2,
-                           3, ... '2 6' would be 2, 8, 14, ... Note: input is a
-                           string so use quotations around the entry and it
-                           always has the number of subsamples overall as the
-                           last point
+  -C,--input-count-field INT
+                           The index for the number of this type in the header
+                           separated by '|' (1 indexed). Used if there are
+                           multiple copies of one entry, so a '4' in the header
+                           would indicate that this entity occurred 4 times.
+                           Defaults to 0, meaning that this field is ignored and
+                           count each sequence as occurring just once
+  -I,--input-subsampling INT INT (INT)
+                           The start point, interval, and optional endpoint of
+                           subsamples in the rarefaction curve. For instance, '1
+                           1 4' would be 1, 2, 3, 4 '2 6 14' would be 2, 8, 14,
+                           ... Note: input is a string so use quotations around
+                           the entry and it always includes the number of
+                           subsamples overall in the result. Excluding the
+                           endpoint results in the number of samples the
+                           endpoint, so '1 1' would be 1, 2, 3, ..., N
+  -g,--input-g Double      Used for calculating the number of individuals (or
+                           samples) needed before the proportion g of the total
+                           number of estimated species is reached. Sobs / Sest <
+                           g < 1
   -f,--fast-bin            Whether to use a much faster, but approximated,
                            binomial coefficient for the rarefaction analysis.
                            This method results in NaNs for larger numbers, so in
                            that case you you should use the slower, more
                            accurate default method
+  -R,--input-runs INT      The number of runs for empirical resampling
+                           rarefaction. This method does not compute the
+                           theoretical, it reports the actual median and median
+                           absolute deviation (MAD) values of this many runs. If
+                           this value is not 0, empirical rarefaction is
+                           automatically enabled (individual based only, not for
+                           sample based)
+  -G,--keep-gaps           Do not remove '.' and '-' characters from the
+                           analysis. This flag will thus treat these characters
+                           as additional entities rather than be ignored as
+                           artificial biological gaps in a sequence
   -n,--remove-N            Remove 'N' and 'n' characters
   -a,--whole-sequence      Ignore window length and only analyze the entire
                            sequence for diversity and rarefaction curves.
