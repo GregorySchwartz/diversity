@@ -9,7 +9,7 @@ homepage:            https://github.com/GregorySchwartz/diversity
 license:             GPL-3
 license-file:        LICENSE
 author:              Gregory W. Schwartz
-maintainer:          gregory.schwartz@drexel.edu
+maintainer:          gsch@mail.med.upenn.edu
 -- copyright:           
 category:            Bioinformatics
 build-type:          Simple
