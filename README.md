@@ -51,7 +51,7 @@ that we want to know the diversity of at each position. We can put those
 sequences in a file `input.fasta` and check the diversity at each position:
 
 ```
-diversity -i input.fasta -o output.csv -w 1 -o 1
+diversity -i input.fasta -o output.csv -w 1 -r 1
 ```
 
 We can see in `output.csv` that each position has a diversity associated with
