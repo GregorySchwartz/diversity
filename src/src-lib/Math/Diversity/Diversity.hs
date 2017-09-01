@@ -10,6 +10,7 @@ module Math.Diversity.Diversity ( hamming
                                 , richness
                                 , diversity
                                 , diversityOfMap
+                                , diversityOfMapWithContribution
                                 , chao1
                                 , chao2
                                 , chao1Var
@@ -78,6 +79,33 @@ diversityOfMap order sample
                            $ sample )
                         ** pow
   where
+    pow          = 1 / (1 - order)
+    h            = negate
+                 . Map.foldl' (+) 0
+                 . Map.map ( \x -> p_i x * log (p_i x))
+    p_i x        = fromIntegral x / fromIntegral (Map.foldl' (+) 0 sample)
+
+-- | Returns the diversity of a map of the species and how many times it
+-- appears, along with the contribution of each species.
+diversityOfMapWithContribution
+    :: (Ord a)
+    => Double -> Map.Map a Int -> (Double, Map.Map a Double)
+diversityOfMapWithContribution order sample
+    | Map.null sample    = (0, Map.empty)
+    | order == 1         = (exp . h $ sample, contrib)
+    | otherwise          = ( ( Map.foldl' (+) 0
+                             . Map.map ((** order) . p_i)
+                             $ sample
+                             )
+                          ** pow
+                           , contrib
+                           )
+  where
+    contrib      = Map.map
+                    ( (/ (fromIntegral $ Map.foldl' (+) 0 sample))
+                    . fromIntegral
+                    )
+                    sample
     pow          = 1 / (1 - order)
     h            = negate
                  . Map.foldl' (+) 0
@@ -323,4 +351,3 @@ minRarefaction bySample fastBin threshold sample !oldRare !count = do
                           (fromIntegral x)
                           1
                           (fromIntegral x)
-
